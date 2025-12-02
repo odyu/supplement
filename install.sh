@@ -42,7 +42,7 @@ if [ "$OS" == "macOS" ]; then
     chmod +x "$SCRIPT_DIR/mac/install.sh"
 
     # macOS用スクリプトの実行
-    "$SCRIPT_DIR/mac/install_mac.sh"
+    "$SCRIPT_DIR/mac/install.sh"
 
 elif [ "$OS" == "Linux" ]; then
     echo -e "${BLUE}>>> Starting Omarchy (Linux) Setup...${NC}"
@@ -58,7 +58,7 @@ elif [ "$OS" == "Linux" ]; then
     chmod +x "$SCRIPT_DIR/omarchy/install.sh"
 
     # Linux用スクリプトの実行
-    "$SCRIPT_DIR/omarchy/install_linux.sh"
+    "$SCRIPT_DIR/omarchy/install.sh"
 
 else
     echo -e "${YELLOW}Error: Unsupported OS type: $(uname -s)${NC}"
