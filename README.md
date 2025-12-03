@@ -12,15 +12,46 @@ supplement/
 
 ## dotfiles
 
-全環境で共通して使う設定ファイルを配置します。
+共通の設定ファイルを GNU Stow のパッケージとして管理します。
 
-- .zshrc（oh-my-zsh と共通プラグイン設定）
-- .vimrc / Neovim 設定
-- .gitconfig（ユーザー情報は各環境で上書き想定）
-- ~/.config/ghostty/config（ターミナルのテーマ・キーバインド）
-- ~/.tmux.conf など
+構成（例）:
 
-展開には GNU Stow やシンボリックリンクなど、好みの方法を使います。
+- dotfiles/
+  - zsh/
+    - .zshrc
+  - p10k/
+    - .p10k.zsh
+  - ideavim/
+    - .ideavimrc
+  - （今後）git/, nvim/, tmux/, config/ghostty/ などを追加可能
+
+使い方:
+
+1) 事前に Stow をインストール（Omarchy/Arch は自動、macOS は Homebrew など）
+
+2) デプロイ（ホームディレクトリ直下にシンボリックリンク作成）
+
+```
+cd dotfiles
+stow -v -R --no-folding zsh p10k ideavim
+```
+
+3) 事前確認（ドライラン）
+
+```
+stow -n -v -R --no-folding zsh p10k ideavim
+```
+
+4) アンデプロイ（削除）
+
+```
+stow -D zsh p10k ideavim
+```
+
+注意:
+
+- 既存ファイルがあると Stow は失敗します。バックアップ後に再実行するか、手動で退避してください。
+- `--adopt` は既存ファイルをリポジトリ側へ取り込むため、通常は推奨しません。
 
 ## omarchy
 
@@ -47,9 +78,9 @@ macOS 専用の設定やセットアップスクリプトを配置します。
    git clone https://github.com/your-account/supplement.git  
    cd supplement
 
-2. 共通 dotfiles を展開する（例：GNU Stow）  
+2. 共通 dotfiles を展開する（GNU Stow）  
    cd dotfiles  
-   stow .
+   stow -v -R --no-folding zsh p10k ideavim
 
 3. 各環境ごとのセットアップスクリプトを実行する  
    - Omarchy / Arch: cd ../omarchy && ./install_linux.sh  
