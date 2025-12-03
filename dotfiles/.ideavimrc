@@ -1,0 +1,12 @@
+" Search
+set ignorecase
+set smartcase
+set hlsearch
+set incsearch
+
+" Key mapping
+inoremap jj <Esc>
+nnoremap <leader>g :action Annotate<cr> :action Annotate<cr>
+
+" Plugins' emulation
+set surround
