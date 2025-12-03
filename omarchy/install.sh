@@ -68,6 +68,13 @@ echo -e "${GREEN}✔ External tools setup completed.${NC}"
 echo -e "${BLUE}[3/5] Deploying dotfiles...${NC}"
 
 if [ -d "$DOTFILES_DIR" ]; then
+    # もし前回作成した除外リストが残っていたら削除して、Stow対象に戻す
+    IGNORE_FILE="$DOTFILES_DIR/.stow-local-ignore"
+    if [ -f "$IGNORE_FILE" ]; then
+        echo "Removing .stow-local-ignore to enable full linking..."
+        rm "$IGNORE_FILE"
+    fi
+
     echo "Linking dotfiles from $DOTFILES_DIR"
 
     pushd "$DOTFILES_DIR" > /dev/null
@@ -105,62 +112,19 @@ fi
 # ==============================================================================
 echo -e "${BLUE}[5/5] Configuring Hyprland overrides...${NC}"
 
+# Step 3のStowによって、既に ~/.config/hypr/hyprland-overrides.conf に
+# シンボリックリンクが作成されているはずです。
+# ここでは hyprland.conf 本体への追記のみを行います。
+
 TARGET_CONF_DIR="$HOME/.config/hypr"
 OVERRIDES_FILE="hyprland-overrides.conf"
-TARGET_FILE="$TARGET_CONF_DIR/$OVERRIDES_FILE"
-
-# 【変更点】ソースファイルを dotfiles 配下から取得するように変更
-# ここで ../dotfiles/.config/hypr/hyprland-overrides.conf を指します
-SOURCE_FILE="$DOTFILES_DIR/.config/hypr/$OVERRIDES_FILE"
-
 HYPR_CONF="$TARGET_CONF_DIR/hyprland.conf"
+
+# 絶対パス($HOME)を使用してglobbing errorを防ぐ
 OVERRIDE_LINE="source = $HOME/.config/hypr/$OVERRIDES_FILE"
 
-# リポジトリ内に設定ファイルが存在するか確認
-if [ ! -f "$SOURCE_FILE" ]; then
-    echo -e "${YELLOW}Warning: $SOURCE_FILE not found in repository.${NC}"
-    # 存在しない場合、Stowディレクトリ構造に合わせて作成を試みる
-    echo "Creating an empty file at $SOURCE_FILE to prevent errors..."
-    mkdir -p "$(dirname "$SOURCE_FILE")"
-    touch "$SOURCE_FILE"
-fi
-
-# 5-1. ディレクトリ作成
-mkdir -p "$TARGET_CONF_DIR"
-
-# 5-2. 設定ファイルのコピー (Link -> Copy 変換処理)
-# ----------------------------------------------------
-# Step 3のStowによって、TARGET_FILEは既に「シンボリックリンク」になっているはずです。
-# ここでそれを検知し、実体コピーに置き換えます。
-
-if [ -L "$TARGET_FILE" ]; then
-    # シンボリックリンクだった場合は削除して実体コピーに置き換える
-    # (バックアップはStowが管理しているので、ここではシンプルにリンク解除→コピーでOK)
-    echo "  -> Symlink found (created by Stow). Replacing with physical copy."
-    rm "$TARGET_FILE"
-    cp "$SOURCE_FILE" "$TARGET_FILE"
-    echo -e "${GREEN}✔ Copied $OVERRIDES_FILE (Replaced symlink)${NC}"
-
-elif [ -e "$TARGET_FILE" ]; then
-    # 実体ファイルがある場合、内容を比較して差分があれば更新
-    if cmp -s "$SOURCE_FILE" "$TARGET_FILE"; then
-        echo "  -> File already up to date: $OVERRIDES_FILE"
-    else
-        BACKUP_NAME="${TARGET_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
-        echo "  -> ⚠ Existing file differs. Backing up to $BACKUP_NAME"
-        mv "$TARGET_FILE" "$BACKUP_NAME"
-        cp "$SOURCE_FILE" "$TARGET_FILE"
-        echo -e "${GREEN}✔ Copied $OVERRIDES_FILE${NC}"
-    fi
-else
-    # 新規作成 (Stowが何らかの理由でリンクを作らなかった場合など)
-    cp "$SOURCE_FILE" "$TARGET_FILE"
-    echo -e "${GREEN}✔ Copied $OVERRIDES_FILE${NC}"
-fi
-
-# 5-3. source設定の追記 (絶対パス版)
-# ----------------------------------------------------
 if [ -f "$HYPR_CONF" ]; then
+    # 既に追記済みかチェック（チルダ版と絶対パス版の両方をチェックして重複防止）
     if ! grep -qF "source = $HOME/.config/hypr/$OVERRIDES_FILE" "$HYPR_CONF" && ! grep -qF "source = ~/.config/hypr/$OVERRIDES_FILE" "$HYPR_CONF"; then
         echo "Adding override source to hyprland.conf..."
         echo "" >> "$HYPR_CONF"
