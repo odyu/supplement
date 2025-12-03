@@ -18,22 +18,19 @@ DOTFILES_DIR="$(dirname "$SCRIPT_DIR")/dotfiles" # ../dotfiles を指す
 echo -e "${BLUE}=== Starting Omarchy Setup ===${NC}"
 
 # ==============================================================================
-# 1. 必要なパッケージのインストール
+# 1. 追加パッケージのインストール (Omarchyに標準でないもの)
 # ==============================================================================
-echo -e "${BLUE}[1/5] Installing system packages...${NC}"
+echo -e "${BLUE}[1/5] Installing additional packages...${NC}"
 
-# インストールするパッケージリスト
-# --needed: 既にインストールされている場合はスキップ
 PACKAGES=(
     stow
     unzip
-    # 他に必要なものがあればここに追加 (例: tmux, fzf, ripgrep)
 )
 
 echo "Installing: ${PACKAGES[*]}"
 sudo pacman -S --noconfirm --needed "${PACKAGES[@]}"
 
-echo -e "${GREEN}✔ System packages installed.${NC}"
+echo -e "${GREEN}✔ Additional packages installed.${NC}"
 
 # ==============================================================================
 # 2. 外部ツールのセットアップ (Oh My Zsh, anyenv)
@@ -45,8 +42,6 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
     echo "Installing Oh My Zsh..."
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
-    # インストーラーが作成したデフォルトの .zshrc を削除
-    # (あとで自分のdotfilesをリンクするため)
     if [ -f "$HOME/.zshrc" ]; then
         echo "Removing default .zshrc..."
         rm "$HOME/.zshrc"
@@ -59,8 +54,6 @@ fi
 if [ ! -d "$HOME/.anyenv" ]; then
     echo "Installing anyenv..."
     git clone https://github.com/anyenv/anyenv "$HOME/.anyenv"
-
-    # anyenv-update プラグインも入れておく
     mkdir -p "$HOME/.anyenv/plugins"
     git clone https://github.com/znz/anyenv-update.git "$HOME/.anyenv/plugins/anyenv-update"
 else
@@ -70,38 +63,39 @@ fi
 echo -e "${GREEN}✔ External tools setup completed.${NC}"
 
 # ==============================================================================
-# 3. Dotfilesの展開 (GNU Stow)
+# 3. Dotfilesの展開 (GNU Stow) - 強制適用モード
 # ==============================================================================
 echo -e "${BLUE}[3/5] Deploying dotfiles...${NC}"
 
 if [ -d "$DOTFILES_DIR" ]; then
     echo "Linking dotfiles from $DOTFILES_DIR"
 
-    # dotfilesディレクトリに移動してstowを実行
     pushd "$DOTFILES_DIR" > /dev/null
 
-    # -v: 詳細表示
-    # -t ~: ホームディレクトリをターゲットにする
-    # -R: Restow (リンクの貼り直し・不要リンクの削除)
-    stow -v -t "$HOME" -R .
+    # --adopt: 既存ファイルがある場合、それをリポジトリに取り込む形でリンクを強制作成する
+    stow -v -t "$HOME" --adopt .
+
+    # adoptによってリポジトリ側のファイルが既存ファイルの内容で書き換わってしまうのを防ぐため、
+    # git restore でリポジトリの状態（本来配布したい設定）に戻す
+    git restore .
 
     popd > /dev/null
-    echo -e "${GREEN}✔ Dotfiles deployed.${NC}"
+
+    echo -e "${GREEN}✔ Dotfiles deployed (forced).${NC}"
 else
     echo -e "${YELLOW}Warning: dotfiles directory not found at $DOTFILES_DIR${NC}"
 fi
 
 # ==============================================================================
-# 4. デフォルトシェルの切り替え (Zsh)
+# 4. デフォルトシェルの確認
 # ==============================================================================
 echo -e "${BLUE}[4/5] Checking default shell...${NC}"
 
 CURRENT_SHELL=$(basename "$SHELL")
 if [ "$CURRENT_SHELL" != "zsh" ]; then
     echo "Changing default shell to zsh..."
-    # ユーザーのパスワード入力を求める場合があります
     chsh -s "$(which zsh)"
-    echo -e "${GREEN}✔ Shell changed to zsh. Please log out and back in for changes to take effect.${NC}"
+    echo -e "${GREEN}✔ Shell changed to zsh.${NC}"
 else
     echo "  -> Default shell is already zsh."
 fi
@@ -121,7 +115,7 @@ OVERRIDE_LINE="source = ~/.config/hypr/$OVERRIDES_FILE"
 # 5-1. ディレクトリ作成
 mkdir -p "$TARGET_CONF_DIR"
 
-# 5-2. シンボリックリンク作成 (バックアップ機能付き)
+# 5-2. シンボリックリンク作成
 if [ -L "$TARGET_FILE" ] && [ "$(readlink -f "$TARGET_FILE")" = "$SOURCE_FILE" ]; then
     echo "  -> Link already correct: $OVERRIDES_FILE"
 else
