@@ -98,10 +98,10 @@ elif [ "$OS" == "Linux" ]; then
     fi
 
     # 実行権限の付与
-    chmod +x "$SCRIPT_DIR/omarchy/install.sh"
+    chmod +x "$SCRIPT_DIR/omarchy/install_all.sh"
 
     # Linux用スクリプトの実行
-    "$SCRIPT_DIR/omarchy/install.sh"
+    "$SCRIPT_DIR/omarchy/install_all.sh"
 
 else
     echo -e "${YELLOW}Error: Unsupported OS type: $(uname -s)${NC}"
