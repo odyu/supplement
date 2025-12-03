@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./install-stow.sh
+$HOME/supplement/omarchy/install-stow.sh
