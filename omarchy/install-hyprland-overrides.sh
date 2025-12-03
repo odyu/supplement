@@ -3,7 +3,7 @@
 set -e
 
 HYPRLAND_CONFIG="$HOME/.config/hypr/hyprland.conf"
-OVERRIDES_CONFIG="$HOME/supplement/dotfiles/.config/hyprland-overrides.conf"
+OVERRIDES_CONFIG="$HOME/supplement/dotfiles/.config/hypr/hyprland-overrides.conf"
 SOURCE_LINE="source = $OVERRIDES_CONFIG"
 
 # Check if hyprland config exists
