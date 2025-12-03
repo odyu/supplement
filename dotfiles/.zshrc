@@ -19,7 +19,8 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Plugins
 # anyenvを使う場合、rbenv/nodenvプラグインは競合の可能性がありますが補完用に残してもOK
-plugins=(git yarn common-alias gem iterm2 npm rails rake rbenv node nodenv bundler)
+# NOTE: `common-alias` はインストールされていないと起動時にコンソール出力（警告）を発生させるため除外
+plugins=(git yarn gem iterm2 npm rails rake rbenv node nodenv bundler)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -27,10 +28,15 @@ source $ZSH/oh-my-zsh.sh
 # Tools
 # ==============================================================================
 
-# Load anyenv automatically
+# Load anyenv automatically (only when properly initialized to avoid console output)
 if [ -d "$HOME/.anyenv" ]; then
     export PATH="$HOME/.anyenv/bin:$PATH"
-    eval "$(anyenv init - zsh)"
+    if command -v anyenv >/dev/null 2>&1; then
+        # ANYENV_DEFINITION_ROOT が未初期化だと anyenv が起動時に警告を出すためガード
+        if [ -d "$HOME/.config/anyenv/anyenv-install" ]; then
+            eval "$(anyenv init - zsh)"
+        fi
+    fi
 fi
 
 # ==============================================================================
