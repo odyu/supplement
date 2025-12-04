@@ -1,31 +1,52 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Omarchy installer (Ruby wrapper for bash scripts)
+# macOS用インストーラーのテンプレート
+require 'bundler/inline'
 
-require 'english'
-
-def run!(*cmd)
-  cmd = cmd.flatten
-  puts "▶ Executing: #{cmd.join(' ')}"
-  system(*cmd)
-  status = $CHILD_STATUS&.exitstatus
-  if status != 0
-    warn "✖ Failed (exit #{status}): #{cmd.join(' ')}"
-    exit(status || 1)
-  end
+gemfile do
+  source 'https://rubygems.org'
+  gem 'tty' # これ1つで全部入り！
 end
 
-puts "🚀 [Omarchy] Start"
+require 'tty-command'
+require 'tty-spinner'
+require 'tty-prompt'
+require 'tty-box'
+require 'pastel'
+require "fileutils"
 
-script_dir = File.expand_path(__dir__)
+box = TTY::Box.frame(
+  width: 50,
+  height: 5,
+  padding: 1,
+  align: :center,
+  title: { top_left: ' SUPPLEMENT ' },
+  border: :thick,
+  style: {
+    fg: :cyan, # 枠線の色
+    border: { fg: :cyan }
+  }
+) do
+  'Install supplements for Omarchy.'
+end
+print box
 
-run! 'bash', File.join(script_dir, 'install-packages')
-run! 'bash', File.join(script_dir, 'install-middleware')
-run! 'bash', File.join(script_dir, 'install-dotfiles')
-run! 'bash', File.join(script_dir, 'install-hyprland-overrides')
+def system!(*)
+  system(*, exception: true)
+end
 
-run! 'bash', File.join(script_dir, 'setup-pacakges')
+HOME_ROOT = File.expand_path("~")
 
-puts "🎉 [Omarchy] Completed"
+FileUtils.chdir HOME_ROOT do
+  puts "Start install supplements for Omarchy."
+  puts "pwd: #{Dir.pwd}"
 
+  system! "install-packages"
+  system! "install-middleware"
+  system! "install-dotfiles"
+  system! "install-hyprland-overrides"
+  system! "setup-packages"
+
+  puts "Finished install supplements for Omarchy."
+end

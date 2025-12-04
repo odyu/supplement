@@ -1,74 +1,117 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/usr/bin/env ruby
+# frozen_string_literal: true
 
-echo "📦 Starting Package Installation..."
+# Arch/Omarchy 向けパッケージインストーラー (Ruby + TTY UI)
 
-# ==============================================================================
+require 'bundler/inline'
+
+gemfile do
+  source 'https://rubygems.org'
+  gem 'tty'
+end
+
+require 'tty-command'
+require 'tty-spinner'
+require 'tty-box'
+require 'pastel'
+require 'tmpdir'
+require 'fileutils'
+
+def system!(*cmd)
+  # 例外を投げる system ラッパー（Ruby 3.2+）
+  system(*cmd, exception: true)
+end
+
+pastel = Pastel.new
+
+header = TTY::Box.frame(
+  width: 60,
+  height: 5,
+  padding: 1,
+  align: :center,
+  title: { top_left: ' SUPPLEMENT ' },
+  border: :thick,
+  style: { fg: :cyan, border: { fg: :cyan } }
+) { '📦 Starting Package Installation...' }
+
+puts header
+
+# -----------------------------------------------------------------------------
 # 設定: インストールしたいパッケージのリスト
-# ==============================================================================
+# -----------------------------------------------------------------------------
 
-# 1. 公式リポジトリ (pacman) から入れるもの
-PACMAN_PACKAGES=(
-    base-devel
-    git
-    stow
-    unzip
-    neovim
-    zsh
-    # ripgrep
-    # fzf
-    # tmux
-)
+PACMAN_PACKAGES = %w[
+  base-devel
+  git
+  stow
+  unzip
+  neovim
+  zsh
+].freeze
 
-# 2. AUR (yay) から入れるもの
-AUR_PACKAGES=(
-    google-chrome
-    bitwarden-bin       # パスワード管理 (Binary版でインストール時間を短縮)
-    jetbrains-toolbox   # JetBrains製品(IntelliJなど)の管理ツール
-    # visual-studio-code-bin
-    # slack-desktop
-    # 1password
-)
+AUR_PACKAGES = %w[
+  google-chrome
+  bitwarden-bin
+  jetbrains-toolbox
+].freeze
 
-# ==============================================================================
-# 処理開始
-# ==============================================================================
+spinner = TTY::Spinner.new('[:spinner] Installing Official Packages (pacman)...', format: :dots)
+spinner.auto_spin
+begin
+  # --needed: 既にインストール済みならスキップ (冪等性確保)
+  system! 'sudo', 'pacman', '-S', '--noconfirm', '--needed', *PACMAN_PACKAGES
+  spinner.success(pastel.green(' done'))
+rescue => e
+  spinner.error(pastel.red(' failed'))
+  warn e.message
+  exit 1
+end
 
-# --- 1. 公式パッケージのインストール ---
-echo "-----------------------------------------------------"
-echo "Installing Official Packages..."
-echo "-----------------------------------------------------"
-# --needed: 既にインストール済みならスキップ (冪等性確保)
-sudo pacman -S --noconfirm --needed "${PACMAN_PACKAGES[@]}"
+# yay の存在確認とインストール
+spinner = TTY::Spinner.new('[:spinner] Checking AUR Helper (yay)...', format: :dots)
+spinner.auto_spin
+begin
+  yay_exists = system('command -v yay >/dev/null 2>&1')
+  if yay_exists
+    spinner.success(pastel.green(' yay is already installed.'))
+  else
+    spinner.update(title: 'Installing yay (AUR helper)...')
+    spinner.restart
+    Dir.mktmpdir do |tmp|
+      repo_dir = File.join(tmp, 'yay')
+      system! 'git', 'clone', 'https://aur.archlinux.org/yay.git', repo_dir
+      Dir.chdir(repo_dir) do
+        system! 'makepkg', '-si', '--noconfirm'
+      end
+    end
+    spinner.success(pastel.green(' yay installed successfully.'))
+  end
+rescue => e
+  spinner.error(pastel.red(' failed'))
+  warn e.message
+  exit 1
+end
 
+# AUR パッケージのインストール
+spinner = TTY::Spinner.new('[:spinner] Installing AUR Packages...', format: :dots)
+spinner.auto_spin
+begin
+  system! 'yay', '-S', '--noconfirm', '--needed', *AUR_PACKAGES
+  spinner.success(pastel.green(' done'))
+rescue => e
+  spinner.error(pastel.red(' failed'))
+  warn e.message
+  exit 1
+end
 
-# --- 2. yay (AUR Helper) のセットアップ ---
-echo "-----------------------------------------------------"
-echo "Checking AUR Helper (yay)..."
-echo "-----------------------------------------------------"
+footer = TTY::Box.frame(
+  width: 60,
+  height: 3,
+  padding: 1,
+  align: :center,
+  border: :thick,
+  style: { fg: :green, border: { fg: :green } }
+) { '✅ All packages installation sequence completed.' }
 
-if ! command -v yay &> /dev/null; then
-    echo "⚠️ yay not found. Installing from AUR..."
-    TEMP_DIR=$(mktemp -d)
-    git clone https://aur.archlinux.org/yay.git "$TEMP_DIR/yay"
+puts footer
 
-    pushd "$TEMP_DIR/yay" > /dev/null
-    makepkg -si --noconfirm
-    popd > /dev/null
-
-    rm -rf "$TEMP_DIR"
-    echo "✅ yay installed successfully."
-else
-    echo "✅ yay is already installed."
-fi
-
-
-# --- 3. AURパッケージのインストール ---
-echo "-----------------------------------------------------"
-echo "Installing AUR Packages..."
-echo "-----------------------------------------------------"
-# yay も --needed が使えるので冪等性が保たれます
-yay -S --noconfirm --needed "${AUR_PACKAGES[@]}"
-
-
-echo "✅ All packages installation sequence completed."
