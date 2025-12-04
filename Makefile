@@ -1,3 +1,10 @@
+# --- Global Settings ---
+# システムRuby使用時、Gemをユーザー領域(~/.gem)にインストールさせる設定
+export GEM_HOME ?= $(HOME)/.gem
+export PATH := $(GEM_HOME)/bin:$(PATH)
+
+# --- Targets ---
+
 # Default entrypoint
 install: status
 	@OS=$$(uname -s); \
@@ -16,16 +23,11 @@ help: ## 利用可能なターゲット一覧を表示
 	awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-24s %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 
 # --- Private / Internal Targets ---
-# (## を書かないことで help に表示させない)
 
 prepare:
 	@# Bundlerチェック & インストール
-	@# 1. まず普通にインストールを試みる (rbenvなどはこれで通る)
-	@# 2. 失敗したら sudo を付けてリトライする (ArchのシステムRuby対策)
-	@gem list -i bundler >/dev/null 2>&1 || \
-		(echo "Installing bundler..." && \
-		(gem install bundler --no-document 2>/dev/null || \
-		(echo "  Permissions denied. Retrying with sudo..." && sudo gem install bundler --no-document)))
+	@# GEM_HOMEが設定されたので、sudoなしで通るはず
+	@gem list -i bundler >/dev/null 2>&1 || (echo "Installing bundler..." && gem install bundler --no-document)
 	@# 実行権限を一括付与
 	@chmod +x bin/status mac/install omarchy/install || true
 
