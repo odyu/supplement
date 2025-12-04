@@ -1,15 +1,12 @@
 
 # Default entrypoint
-install: check-git ## OSを自動判定してインストールを実行
-	@echo "=== Supplement Installer (Make) ==="
-	@echo "Repository Root: $(CURDIR)"
-	@OS=$$(uname -s); \
+install: status
+	@echo "=== Supplement install ==="
 	case "$$OS" in \
 	  Darwin*) echo "Detected OS: macOS"; $(MAKE) install-mac ;; \
-	  Linux*)  if [ -f /etc/arch-release ]; then echo "Detected OS: Omarchy"; $(MAKE) install-omarchy; else echo "Error: Unsupported OS type for this installer"; exit 1; fi ;; \
+	  Linux*)  echo "Detected OS: Omarchy"; $(MAKE) install-omarchy ;; \
 	  *) echo "Error: Unsupported OS"; exit 1 ;; \
 	esac
-	@$(MAKE) status
 	@echo "=== All Installation Scripts Completed Successfully ==="
 
 install-mac: ## macOS向けセットアップを実行
@@ -19,11 +16,6 @@ install-mac: ## macOS向けセットアップを実行
 
 install-omarchy: ## Omarchy向けセットアップを実行
 	@echo ">>> Starting Omarchy Setup..."
-	@if [ -f /etc/arch-release ]; then \
-	  echo "Arch detected."; \
-	else \
-	  echo "Warning: This script is optimized for Omarchy (Arch)."; \
-	fi
 	@chmod +x omarchy/install.sh || true
 	@./omarchy/install.sh
 
