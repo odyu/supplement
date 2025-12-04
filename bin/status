@@ -6,7 +6,6 @@ require 'bundler/inline'
 gemfile do
   source 'https://rubygems.org'
   gem 'tty'
-  gem 'pastel'
 end
 
 require 'tty-box'
@@ -24,6 +23,7 @@ box = TTY::Box.frame(
   padding: 1,
   align: :center,
   title: { top_left: ' SUPPLEMENT ' },
+  border: :thick,
   style: {
     fg: :cyan, # 枠線の色
     border: { fg: :cyan }

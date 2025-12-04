@@ -16,16 +16,26 @@ require 'tty-box'
 require 'pastel'
 require "fileutils"
 
+box = TTY::Box.frame(
+  width: 50,
+  height: 5,
+  padding: 1,
+  align: :center,
+  title: { top_left: ' SUPPLEMENT ' },
+  border: :thick,
+  style: {
+    fg: :cyan, # 枠線の色
+    border: { fg: :cyan }
+  }
+) do
+  'Install supplements for macOS.'
+end
+print box
+
 HOME_ROOT = File.expand_path("~")
 
 FileUtils.chdir HOME_ROOT do
-  print TTY::Box.frame(
-    width: 50,
-    height: 5,
-    border: :thick,
-    title: {top_left: " OMARCHY INSTALLER "},
-    style: { border: { fg: :cyan } }
-  ) do
-    "ようこそ！\nRubyで書かれた最強のインストーラーへ\npwd: #{Dir.pwd}"
-  end
+  puts "Start install supplements for macOS."
+  puts "pwd: #{Dir.pwd}"
+  puts "Finished install supplements for macOS."
 end
