@@ -29,21 +29,11 @@ install-omarchy: ## Omarchy向けセットアップを実行
 
 status: ## OSを表示し、git statusを確認。未コミット変更があれば警告を出す
 	@OS=$$(uname -s); if [ "$$OS" = "Darwin" ]; then echo "OS: macOS"; elif [ -f /etc/arch-release ]; then echo "OS: Omarchy"; else echo "OS: Unknown"; fi
-	@# Gitステータスを表示し、変更があればアラートを出す
 	@if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then \
-	  echo "=== Git Status (short) ==="; \
-	  git status --short || true; \
 	  if [ -n "$$(git status --porcelain)" ]; then \
-	    echo "---------------------------------------"; \
-	    echo "[ALERT] 未コミットの変更があります。"; \
-	    echo "この状態での処理は再現性に影響する可能性があります。"; \
-	    echo "commit または stash を検討してください。"; \
-	    echo "---------------------------------------"; \
-	  else \
-	    echo "クリーンな状態です。未コミットの変更はありません。"; \
+	    echo "Change supplement files:"; \
+	    git status --short; \
 	  fi; \
-	else \
-	  echo "Gitリポジトリ外です。statusはスキップします。"; \
 	fi
 
 check-git: ## make実行前に未コミット変更があればエラー終了（再現性担保）
