@@ -1,12 +1,14 @@
 
 # Default entrypoint
-install: status
+install:
 	@echo "=== Supplement install ==="
+	@OS=$$(uname -s); \
 	case "$$OS" in \
 	  Darwin*) echo "Detected OS: macOS"; $(MAKE) install-mac ;; \
-	  Linux*)  echo "Detected OS: Omarchy"; $(MAKE) install-omarchy ;; \
+	  Linux*)  if [ -f /etc/arch-release ]; then echo "Detected OS: Omarchy"; $(MAKE) install-omarchy; else echo "Error: Unsupported OS"; exit 1; fi ;; \
 	  *) echo "Error: Unsupported OS"; exit 1 ;; \
 	esac
+	@$(MAKE) status
 	@echo "=== All Installation Scripts Completed Successfully ==="
 
 install-mac: ## macOS向けセットアップを実行
