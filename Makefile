@@ -19,8 +19,13 @@ help: ## 利用可能なターゲット一覧を表示
 # (## を書かないことで help に表示させない)
 
 prepare:
-	@# Bundlerチェック
-	@gem list -i bundler >/dev/null 2>&1 || (echo "Installing bundler..." && gem install bundler --no-document)
+	@# Bundlerチェック & インストール
+	@# 1. まず普通にインストールを試みる (rbenvなどはこれで通る)
+	@# 2. 失敗したら sudo を付けてリトライする (ArchのシステムRuby対策)
+	@gem list -i bundler >/dev/null 2>&1 || \
+		(echo "Installing bundler..." && \
+		(gem install bundler --no-document 2>/dev/null || \
+		(echo "  Permissions denied. Retrying with sudo..." && sudo gem install bundler --no-document)))
 	@# 実行権限を一括付与
 	@chmod +x bin/status mac/install omarchy/install || true
 
