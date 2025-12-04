@@ -7,15 +7,7 @@ install: status
 	  *) echo "Error: Unsupported OS"; exit 1 ;; \
 	esac
 
-install-mac: ## macOS向けセットアップを実行
-	@chmod +x mac/install || true
-	@./mac/install
-
-install-omarchy: ## Omarchy向けセットアップを実行
-	@chmod +x omarchy/install || true
-	@./omarchy/install
-
-status: ## OSを表示し、git statusを確認。未コミット変更があれば警告を出す
+status: prepare ## OSを表示し、git statusを確認
 	@bin/status
 
 help: ## 利用可能なターゲット一覧を表示
@@ -23,4 +15,19 @@ help: ## 利用可能なターゲット一覧を表示
 	echo "\nTargets:"; \
 	awk 'BEGIN {FS = ":.*## "} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-24s %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 
-.PHONY: install install-mac install-omarchy status help
+# --- Private / Internal Targets ---
+# (## を書かないことで help に表示させない)
+
+prepare:
+	@# Bundlerチェック
+	@gem list -i bundler >/dev/null 2>&1 || (echo "Installing bundler..." && gem install bundler --no-document)
+	@# 実行権限を一括付与
+	@chmod +x bin/status mac/install omarchy/install || true
+
+install-mac: prepare
+	@./mac/install
+
+install-omarchy: prepare
+	@./omarchy/install
+
+.PHONY: install status help prepare install-mac install-omarchy
