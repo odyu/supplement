@@ -1,5 +1,5 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env ruby
+# frozen_string_literal: true
 
 echo "📦 Starting Package Installation..."
 

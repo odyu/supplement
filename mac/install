@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# macOS用インストーラーのテンプレート
+require 'bundler/inline'
+
+gemfile do
+  source 'https://rubygems.org'
+  gem 'tty'  # これ1つで全部入り！
+end
+
+require 'tty-command'
+require 'tty-spinner'
+require 'tty-prompt'
+require 'tty-box'
+require 'pastel'
+require "fileutils"
+
+HOME_ROOT = File.expand_path("~")
+
+FileUtils.chdir HOME_ROOT do
+  print TTY::Box.frame(
+    width: 50,
+    height: 5,
+    border: :thick,
+    title: {top_left: " OMARCHY INSTALLER "},
+    style: { border: { fg: :cyan } }
+  ) do
+    "ようこそ！\nRubyで書かれた最強のインストーラーへ\npwd: #{Dir.pwd}"
+  end
+end

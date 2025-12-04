@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+echo "🛠️ [Middleware] Start"
 
 ANYENV_DIR="$HOME/.anyenv"
 if ! [ -d "$ANYENV_DIR" ]; then
@@ -16,3 +19,5 @@ if ! [ -d "$P10K_DIR" ]; then
   mkdir -p "$ZSH_CUSTOM_DIR/themes"
   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
 fi
+
+echo "🎉 [Middleware] Completed"

@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Omarchy installer (Ruby wrapper for bash scripts)
+
+require 'english'
+
+def run!(*cmd)
+  cmd = cmd.flatten
+  puts "▶ Executing: #{cmd.join(' ')}"
+  system(*cmd)
+  status = $CHILD_STATUS&.exitstatus
+  if status != 0
+    warn "✖ Failed (exit #{status}): #{cmd.join(' ')}"
+    exit(status || 1)
+  end
+end
+
+puts "🚀 [Omarchy] Start"
+
+script_dir = File.expand_path(__dir__)
+
+run! 'bash', File.join(script_dir, 'install-packages')
+run! 'bash', File.join(script_dir, 'install-middleware')
+run! 'bash', File.join(script_dir, 'install-dotfiles')
+run! 'bash', File.join(script_dir, 'install-hyprland-overrides')
+
+run! 'bash', File.join(script_dir, 'setup-pacakges')
+
+puts "🎉 [Omarchy] Completed"
+

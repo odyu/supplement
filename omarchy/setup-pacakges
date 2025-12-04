@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+echo "🧰 [Setup Packages] Start"
+
+[ "$SHELL" != "$(which zsh)" ] && chsh -s "$(which zsh)"
+
+echo "🎉 [Setup Packages] Completed"

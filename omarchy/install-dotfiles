@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Dotfiles installer (Ruby)
+
+def run!(*cmd)
+  cmd = cmd.flatten
+  puts "▶ #{cmd.join(' ')}"
+  system(*cmd)
+  status = $?.exitstatus
+  if status != 0
+    warn "✖ Failed (exit #{status}): #{cmd.join(' ')}"
+    exit(status || 1)
+  end
+end
+
+puts "✨ [Dotfiles] Start"
+
+home = ENV["HOME"].to_s
+dotfiles_dir = File.expand_path(File.join(home, "supplement/dotfiles"))
+Dir.chdir(dotfiles_dir)
+
+# 既存ファイルがあってもエラーにせず、リンクに置き換える
+%w[zsh p10k ideavim].each do |pkg|
+  run! "stow", "-v", "-R", "--adopt", "--no-folding", "-t", home, pkg
+end
+
+puts "🎉 [Dotfiles] Completed"
