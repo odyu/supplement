@@ -17,7 +17,7 @@ PACMAN_PACKAGES=(
 
 echo "sudo pacman -S --noconfirm --needed ${PACMAN_PACKAGES[@]}"
 sudo pacman -S --noconfirm --needed "${PACMAN_PACKAGES[@]}"
-
+echo ""
 # インストール対象（AUR）
 AUR_PACKAGES=(
   google-chrome
@@ -27,6 +27,7 @@ AUR_PACKAGES=(
 
 echo "yay -S --noconfirm --needed ${AUR_PACKAGES[@]}"
 yay -S --noconfirm --needed "${AUR_PACKAGES[@]}"
+echo ""
 
 echo "✅ Package installation sequence completed."
 echo ""
