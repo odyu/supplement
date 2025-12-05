@@ -7,7 +7,6 @@ echo "Home directory: ${HOME}"
 echo ""
 
 "${SCRIPT_DIR}/install-packages.sh"
-"${SCRIPT_DIR}/install-middleware.sh"
 "${SCRIPT_DIR}/install-dotfiles.sh"
 "${SCRIPT_DIR}/install-hyprland-overrides.sh"
 "${SCRIPT_DIR}/setup-pacakges.sh"
