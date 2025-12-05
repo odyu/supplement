@@ -37,12 +37,24 @@ echo "🔸 Install anyenv"
 echo ""
 ANYENV_DIR="$HOME/.anyenv"
 if [ -d "$ANYENV_DIR" ]; then
-  echo "✅ Anyenv already exists at $ANYENV_DIR, skipping clone."
+  echo "✅ Anyenv already exists at $ANYENV_DIR, skipping install."
 else
   echo "git clone https://github.com/anyenv/anyenv $ANYENV_DIR"
   git clone https://github.com/anyenv/anyenv "$ANYENV_DIR"
 fi
 echo ""
+
+echo "🔸 Install oh-my-zsh"
+echo ""
+OH_MY_ZSH_DIR="$HOME/.oh-my-zsh"
+if [ -d "$OH_MY_ZSH_DIR" ]; then
+  echo "✅ Oh My Zsh already exists at $OH_MY_ZSH_DIR, skipping install."
+else
+  echo 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"'
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+echo ""
+
 
 echo "✅ Package installation sequence completed."
 echo ""
