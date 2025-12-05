@@ -1,9 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸"
-echo "🔸  Install packages"
-echo "🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸"
+echo "🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸"
+echo "🔸 Install packages"
+echo "🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸"
 
 # インストール対象（公式）
 PACMAN_PACKAGES=(
@@ -15,6 +15,9 @@ PACMAN_PACKAGES=(
   zsh
 )
 
+echo "sudo pacman -S --noconfirm --needed ${PACMAN_PACKAGES[@]}"
+sudo pacman -S --noconfirm --needed "${PACMAN_PACKAGES[@]}"
+
 # インストール対象（AUR）
 AUR_PACKAGES=(
   google-chrome
@@ -22,8 +25,9 @@ AUR_PACKAGES=(
   jetbrains-toolbox
 )
 
-sudo pacman -S --noconfirm --needed "${PACMAN_PACKAGES[@]}"
+echo "yay -S --noconfirm --needed ${AUR_PACKAGES[@]}"
 yay -S --noconfirm --needed "${AUR_PACKAGES[@]}"
 
 echo "✅ Package installation sequence completed."
+echo ""
 
