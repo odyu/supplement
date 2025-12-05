@@ -17,6 +17,20 @@ else
   echo "✅ Zsh already default shell at $ZSH_PATH, skipping setup."
 fi
 
+echo "🔸 Setup Hyprland overrides"
+echo ""
+HYPR_CONFIG_PATH="${HOME}/.config/hypr"
+if [ -f "${HYPR_CONFIG_PATH}/hyprland-override.conf" ]; then
+  echo "cat ${HYPR_CONFIG_PATH}/hyprland-override.conf >> ${HYPR_CONFIG_PATH}/hyprland.conf"
+  cat "${HYPR_CONFIG_PATH}/hyprland-override.conf" >> "${HYPR_CONFIG_PATH}/hyprland.conf"
+fi
+
+if [ -f "${HYPR_CONFIG_PATH}/monitor-overrides.conf" ]; then
+  echo "cat ${HYPR_CONFIG_PATH}/monitor-overrides.conf >> ${HYPR_CONFIG_PATH}/monitors.conf"
+  cat "${HYPR_CONFIG_PATH}/monitor-overrides.conf" >> "${HYPR_CONFIG_PATH}/monitors.conf"
+fi
+echo ""
+
 echo "🎉 Setup packages completed."
 echo ""
 
