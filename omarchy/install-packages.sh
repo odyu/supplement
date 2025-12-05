@@ -55,6 +55,19 @@ else
 fi
 echo ""
 
+echo "🔸 Install powerlevel10k"
+echo ""
+ZSH_CUSTOM_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+P10K_DIR="$ZSH_CUSTOM_DIR/themes/powerlevel10k"
+if [ -d "$P10K_DIR" ]; then
+  echo "✅ Powerlevel10k already exists at $P10K_DIR, skipping install."
+else
+  echo "git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $P10K_DIR"
+  mkdir -p "$ZSH_CUSTOM_DIR/themes"
+  git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
+fi
+echo ""
+
 
 echo "✅ Package installation sequence completed."
 echo ""
