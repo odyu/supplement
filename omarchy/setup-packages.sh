@@ -22,6 +22,18 @@ echo ""
 
 
 
+echo "🔸 Enable keyd"
+echo ""
+if ! systemctl is-enabled --quiet keyd; then
+  echo "sudo systemctl enable keyd --now"
+  sudo systemctl enable keyd --now
+else
+  echo "✅ Already enabled keyd"
+fi
+echo ""
+
+
+
 echo "🔸 Setup Hyprland overrides"
 echo ""
 HYPR_CONFIG_PATH="${HOME}/.config/hypr"
