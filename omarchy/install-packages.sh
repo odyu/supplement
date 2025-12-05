@@ -69,6 +69,6 @@ fi
 echo ""
 
 
-echo "✅ Package installation sequence completed."
+echo "🎉 Install packages completed."
 echo ""
 

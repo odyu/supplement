@@ -1,20 +1,38 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "✨ [Dotfiles] Start"
+
+echo "🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸"
+echo "🔸 Deploy dotfiles"
+echo "🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸"
+echo ""
 
 HOME_DIR="${HOME}"
 DOTFILES_DIR="${HOME_DIR}/supplement/dotfiles"
-
-echo "Home: ${HOME_DIR}"
-echo "Dotfiles dir: ${DOTFILES_DIR}"
-
 cd "${DOTFILES_DIR}"
 
-packages=(zsh p10k ideavim)
-for pkg in "${packages[@]}"; do
-  echo "▶ stow -v -R --adopt --no-folding -t ${HOME_DIR} ${pkg}"
-  stow -v -R --adopt --no-folding -t "${HOME_DIR}" "${pkg}"
-done
+echo "Home directory: ${HOME_DIR}"
+echo "Dotfiles directory: ${DOTFILES_DIR}"
+echo "Working directory: ${pwd}"
 
-echo "🎉 [Dotfiles] Completed"
+
+
+echo "🔸 Deploy zsh dotfiles"
+echo ""
+echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} zsh"
+stow -v -R --adopt --no-folding -t "${HOME_DIR}" zsh
+echo ""
+
+echo "🔸 Deploy p10k dotfiles"
+echo ""
+echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} p10k"
+stow -v -R --adopt --no-folding -t "${HOME_DIR}" p10k
+echo ""
+
+echo "🔸 Deploy ideavim dotfiles"
+echo ""
+echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} ideavim"
+stow -v -R --adopt --no-folding -t "${HOME_DIR}" ideavim
+echo ""
+
+echo "🎉 Deploy dotfiles completed."
