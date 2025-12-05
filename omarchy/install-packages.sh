@@ -10,10 +10,14 @@ echo "🔸 Install packages By PACMAN"
 echo ""
 PACMAN_PACKAGES=(
   base-devel
+  fcitx5-configtool
+  fcitx5-im
+  fcitx5-mozc
   git
+  keyd
+  neovim
   stow
   unzip
-  neovim
   zsh
 )
 echo "sudo pacman -S --noconfirm --needed ${PACMAN_PACKAGES[@]}"
