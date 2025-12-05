@@ -19,7 +19,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Plugins
 # anyenvを使う場合、rbenv/nodenvプラグインは競合の可能性がありますが補完用に残してもOK
-plugins=(git yarn common-alias gem iterm2 npm rails rake rbenv node nodenv bundler)
+plugins=(git yarn aliases gem iterm2 npm rails rake rbenv node nodenv bundler)
 
 source $ZSH/oh-my-zsh.sh
 

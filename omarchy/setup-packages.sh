@@ -49,6 +49,30 @@ fi
 echo ""
 
 
+echo "🔸 Setup Anyenv"
+echo ""
+
+# 1. Initialize manifest
+if [ ! -d "${HOME}/.config/anyenv/anyenv-install" ]; then
+  echo "anyenv install --force-init"
+  anyenv install --force-init
+else
+  echo "✅ Anyenv manifests already initialized"
+fi
+
+# 2. Install each environment
+TARGET_ENVS=("rbenv" "nodenv" "goenv" "pyenv")
+
+for env in "${TARGET_ENVS[@]}"; do
+  # default install path is ~/.anyenv/envs
+  if [ -d "${HOME}/.anyenv/envs/${env}" ]; then
+    echo "✅ ${env} already installed"
+  else
+    echo "Installing ${env}..."
+    anyenv install --skip-existing "${env}"
+  fi
+done
+echo ""
 
 echo "🎉 Setup packages completed."
 echo ""
