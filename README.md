@@ -101,12 +101,15 @@ macOS 専用の設定やセットアップスクリプトを配置します。
    git clone https://github.com/your-account/supplement.git "$HOME/supplement"  
    cd "$HOME/supplement"
 
-2. 共通 dotfiles を展開する（GNU Stow）  
-   bash "$HOME/supplement/omarchy/install-dotfiles.sh"
+2. ルートのインストーラを実行（Makefile は廃止 → install.sh に統一）  
+   bash ./install.sh
 
-3. 各環境ごとのセットアップスクリプトを実行する  
-   - Omarchy / Arch: cd omarchy && ./install.sh  
-   - macOS: cd mac && ./install.sh
+   - OS は自動判別されます（macOS なら mac/install.sh、Omarchy/Arch なら omarchy/install.sh を起動）
+   - 状態確認: bash ./install.sh status  
+   - ヘルプ: bash ./install.sh help
+
+3. 共通 dotfiles を個別に展開したい場合（任意）  
+   bash "$HOME/supplement/omarchy/install-dotfiles.sh"
 
 ## シークレットと環境変数
 
@@ -119,3 +122,4 @@ API キーやパスワードなどの秘匿情報はリポジトリには含め�
 
 - Omarchy 環境を基準にしつつ、macOS は「必要なものだけ抜き出して使う」想定です。
 - セットアップスクリプトや設定は、何度実行しても壊れない（冪等）ことを目標にします。
+- 以前の make install は非推奨です。今後は bash ./install.sh を使用してください。
