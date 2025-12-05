@@ -37,12 +37,12 @@ echo "🔸 Install anyenv"
 echo ""
 ANYENV_DIR="$HOME/.anyenv"
 if [ -d "$ANYENV_DIR" ]; then
-  echo "Anyenv already exists at $ANYENV_DIR, skipping clone."
+  echo "✅ Anyenv already exists at $ANYENV_DIR, skipping clone."
 else
   echo "git clone https://github.com/anyenv/anyenv $ANYENV_DIR"
   git clone https://github.com/anyenv/anyenv "$ANYENV_DIR"
 fi
-
+echo ""
 
 echo "✅ Package installation sequence completed."
 echo ""
