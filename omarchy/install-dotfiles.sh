@@ -39,4 +39,10 @@ echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} hyprland"
 stow -v -R --adopt --no-folding -t "${HOME_DIR}" hyprland
 echo ""
 
+echo "🔸 Deploy fcitx5 dotfiles"
+echo ""
+echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} fcitx5"
+stow -v -R --adopt --no-folding -t "${HOME_DIR}" fcitx5
+echo ""
+
 echo "🎉 Deploy dotfiles completed."

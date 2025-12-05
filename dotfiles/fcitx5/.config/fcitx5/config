@@ -1,0 +1,11 @@
+[Hotkey]
+# 入力メソッドをオンにするキー (右Cmd -> Henkan)
+ActivateKeys=Henkan
+# 入力メソッドをオフにするキー (左Cmd -> Muhenkan)
+DeactivateKeys=Muhenkan
+
+# 以下はデフォルトでOKですが、切り替えキー(Ctrl+Space)を残すなら記載
+TriggerKeys=Control+Space
+
+[Behavior]
+# ここはデフォルトでOK
