@@ -130,3 +130,7 @@ alias reload='source ~/.zshrc'
 
 # Load zshrc for local machine specific settings (Git ignored - for temp paths)
 [[ ! -f ~/.zshrc.local ]] || source ~/.zshrc.local
+
+# Ensure alias expansion is enabled
+# p10kの設定ファイルが一時的に無効化したまま戻らなかったため
+setopt aliases
