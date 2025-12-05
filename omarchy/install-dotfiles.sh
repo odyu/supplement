@@ -13,9 +13,7 @@ cd "${DOTFILES_DIR}"
 
 echo "Home directory: ${HOME_DIR}"
 echo "Dotfiles directory: ${DOTFILES_DIR}"
-echo "Working directory: ${pwd}"
-
-
+echo "Working directory: $(pwd)"
 
 echo "🔸 Deploy zsh dotfiles"
 echo ""
