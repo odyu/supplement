@@ -1,12 +1,7 @@
-# --- Global Settings ---
-# システムRuby使用時、Gemをユーザー領域(~/.gem)にインストールさせる設定
-export GEM_HOME ?= $(HOME)/.gem
-export PATH := $(GEM_HOME)/bin:$(PATH)
-
 # --- Targets ---
 
 # Default entrypoint
-install: status
+install: status ## Omarchy と macOS 用の supplement をインストール
 	@OS=$$(uname -s); \
 	case "$$OS" in \
 	  Darwin*) $(MAKE) install-mac ;; \
@@ -14,7 +9,8 @@ install: status
 	  *) echo "Error: Unsupported OS"; exit 1 ;; \
 	esac
 
-status: prepare ## OSを表示し、git statusを確認
+status: ## OSを表示し、git statusを確認
+	@chmod +x bin/status
 	@bin/status
 
 help: ## 利用可能なターゲット一覧を表示
@@ -24,17 +20,12 @@ help: ## 利用可能なターゲット一覧を表示
 
 # --- Private / Internal Targets ---
 
-prepare:
-	@# Bundlerチェック & インストール
-	@# GEM_HOMEが設定されたので、sudoなしで通るはず
-	@gem list -i bundler >/dev/null 2>&1 || (echo "Installing bundler..." && gem install bundler --no-document)
-	@# 実行権限を一括付与
-	@chmod +x bin/status mac/install omarchy/install || true
-
-install-mac: prepare
+install-mac:
+	@chmod +x mac/install
 	@./mac/install
 
-install-omarchy: prepare
+install-omarchy:
+	@chmod +x omarchy/install
 	@./omarchy/install
 
-.PHONY: install status help prepare install-mac install-omarchy
+.PHONY: install status help install-mac install-omarchy

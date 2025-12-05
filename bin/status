@@ -1,89 +1,30 @@
-#!/usr/bin/env ruby
-# frozen_string_literal: true
+#!/bin/bash
+set -euo pipefail
 
-require 'bundler/inline'
+echo ""
+echo "🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸"
+echo "🔸  Status Check"
+echo "🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸 🔸"
+echo ""
 
-gemfile do
-  source 'https://rubygems.org'
-  gem 'tty'
-end
+# --- OS Detection ---
+OS_NAME="$(uname -s)"
+if [ "$OS_NAME" == "Darwin" ]; then
+  echo "💻  Detected OS: macOS 🍎"
+elif [ -f /etc/arch-release ]; then
+  echo "💻  Detected OS: Omarchy (Arch Linux) 🐧"
+else
+  echo "💻  Detected OS: Unknown OS ❓"
+fi
+echo ""
 
-require 'tty-box'
-require 'tty-command'
-require 'pastel'
+GIT_STATUS=$(git status --porcelain)
 
-cmd = TTY::Command.new(printer: :null)
-pastel = Pastel.new
-
-# --- 1. ヘッダー表示 ---
-# ブロックで中身を書きつつ、返り値を print で出力します
-box = TTY::Box.frame(
-  width: 50,
-  height: 5,
-  padding: 1,
-  align: :center,
-  title: { top_left: ' SUPPLEMENT ' },
-  border: :thick,
-  style: {
-    fg: :cyan, # 枠線の色
-    border: { fg: :cyan }
-  }
-) do
-  'System Status Check'
-end
-print box
-
-# --- 2. OS検出 ---
-os_name = `uname -s`.strip
-os_display = if os_name == 'Darwin'
-               'macOS 🍎'
-             elsif File.exist?('/etc/arch-release')
-               'Omarchy (Arch Linux) 🐧'
-             else
-               'Unknown OS ❓'
-             end
-
-puts pastel.bold('Detected OS: ') + pastel.cyan(os_display)
-puts
-
-# --- 3. Git Status 確認 ---
-begin
-  cmd.run('git rev-parse --is-inside-work-tree')
-  out, = cmd.run('git status --porcelain')
-
-  if out.empty?
-    puts pastel.green('✔ No changes found. Working tree is clean.')
-  else
-    puts pastel.yellow('⚠ Uncommitted changes detected:')
-    puts
-
-    out.each_line do |line|
-      status_code = line[0..1]
-      file = line[3..-1].strip
-
-      # ステータスコードに応じた色付け
-      colored_status = if status_code.include?('M')
-                         pastel.yellow(status_code)
-                       elsif status_code.include?('A')
-                         pastel.green(status_code)
-                       elsif status_code.include?('D')
-                         pastel.red(status_code)
-                       elsif status_code.include?('R')
-                         pastel.blue(status_code)
-                       elsif status_code.include?('?')
-                         pastel.dim(status_code)
-                       else
-                         pastel.white(status_code)
-                       end
-
-      puts "  #{colored_status}  #{file}"
-    end
-
-    puts
-    puts pastel.dim('To update, commit these changes or run make install.')
-  end
-
-rescue TTY::Command::ExitError
-  puts pastel.red('Not a git repository.')
-end
-puts
+if [ -z "$GIT_STATUS" ]; then
+  echo -e "✅  No changes found. Working tree is clean."
+  echo ""
+else
+  echo -e "⚠️  Uncommitted changes files !"
+  echo ""
+  git status
+fi

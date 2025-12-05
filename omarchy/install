@@ -1,52 +1,34 @@
-#!/usr/bin/env ruby
-# frozen_string_literal: true
+#!/bin/bash
+set -euo pipefail
 
-# macOS用インストーラーのテンプレート
-require 'bundler/inline'
+echo ""
+echo "🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶"
+echo "🔶"
+echo "🔶   INSTALL SUPPLEMENT for Omarchy 🐧"
+echo "🔶"
+echo "🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶"
+echo ""
 
-gemfile do
-  source 'https://rubygems.org'
-  gem 'tty' # これ1つで全部入り！
-end
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo "Script directory: ${SCRIPT_DIR}"
+echo "Home directory: ${HOME}"
 
-require 'tty-command'
-require 'tty-spinner'
-require 'tty-prompt'
-require 'tty-box'
-require 'pastel'
-require "fileutils"
+echo "[1/5] Running install-packages..."
+"${SCRIPT_DIR}/install-packages"
 
-box = TTY::Box.frame(
-  width: 50,
-  height: 5,
-  padding: 1,
-  align: :center,
-  title: { top_left: ' SUPPLEMENT ' },
-  border: :thick,
-  style: {
-    fg: :cyan, # 枠線の色
-    border: { fg: :cyan }
-  }
-) do
-  'Install supplements for Omarchy.'
-end
-print box
+echo "[2/5] Running install-middleware..."
+"${SCRIPT_DIR}/install-middleware"
 
-def system!(*)
-  system(*, exception: true)
-end
+echo "[3/5] Running install-dotfiles..."
+"${SCRIPT_DIR}/install-dotfiles"
 
-HOME_ROOT = File.expand_path("~")
+echo "[4/5] Running install-hyprland-overrides..."
+"${SCRIPT_DIR}/install-hyprland-overrides"
 
-FileUtils.chdir HOME_ROOT do
-  puts "Start install supplements for Omarchy."
-  puts "pwd: #{Dir.pwd}"
+echo "[5/5] Running setup-pacakges..."
+"${SCRIPT_DIR}/setup-pacakges"
 
-  system! "install-packages"
-  system! "install-middleware"
-  system! "install-dotfiles"
-  system! "install-hyprland-overrides"
-  system! "setup-packages"
 
-  puts "Finished install supplements for Omarchy."
-end
+echo ""
+echo "😄 FINISHED SUPPLEMENT"
+echo ""

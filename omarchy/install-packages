@@ -1,117 +1,49 @@
-#!/usr/bin/env ruby
-# frozen_string_literal: true
+#!/bin/bash
+set -euo pipefail
 
-# Arch/Omarchy 向けパッケージインストーラー (Ruby + TTY UI)
+echo "🔹 🔹 🔹 🔹 🔹 🔹 🔹 🔹 🔹"
+echo "  Omarchy Package Installer"
+echo "🔹 🔹 🔹 🔹 🔹 🔹 🔹 🔹 🔹"
 
-require 'bundler/inline'
-
-gemfile do
-  source 'https://rubygems.org'
-  gem 'tty'
-end
-
-require 'tty-command'
-require 'tty-spinner'
-require 'tty-box'
-require 'pastel'
-require 'tmpdir'
-require 'fileutils'
-
-def system!(*cmd)
-  # 例外を投げる system ラッパー（Ruby 3.2+）
-  system(*cmd, exception: true)
-end
-
-pastel = Pastel.new
-
-header = TTY::Box.frame(
-  width: 60,
-  height: 5,
-  padding: 1,
-  align: :center,
-  title: { top_left: ' SUPPLEMENT ' },
-  border: :thick,
-  style: { fg: :cyan, border: { fg: :cyan } }
-) { '📦 Starting Package Installation...' }
-
-puts header
-
-# -----------------------------------------------------------------------------
-# 設定: インストールしたいパッケージのリスト
-# -----------------------------------------------------------------------------
-
-PACMAN_PACKAGES = %w[
+# インストール対象（公式）
+PACMAN_PACKAGES=(
   base-devel
   git
   stow
   unzip
   neovim
   zsh
-].freeze
+)
 
-AUR_PACKAGES = %w[
+# インストール対象（AUR）
+AUR_PACKAGES=(
   google-chrome
   bitwarden-bin
   jetbrains-toolbox
-].freeze
+)
 
-spinner = TTY::Spinner.new('[:spinner] Installing Official Packages (pacman)...', format: :dots)
-spinner.auto_spin
-begin
-  # --needed: 既にインストール済みならスキップ (冪等性確保)
-  system! 'sudo', 'pacman', '-S', '--noconfirm', '--needed', *PACMAN_PACKAGES
-  spinner.success(pastel.green(' done'))
-rescue => e
-  spinner.error(pastel.red(' failed'))
-  warn e.message
-  exit 1
-end
+echo "[1/3] Installing Official Packages (pacman)"
+echo "sudo pacman -S --noconfirm --needed ${PACMAN_PACKAGES[*]}"
+sudo pacman -S --noconfirm --needed "${PACMAN_PACKAGES[@]}"
 
-# yay の存在確認とインストール
-spinner = TTY::Spinner.new('[:spinner] Checking AUR Helper (yay)...', format: :dots)
-spinner.auto_spin
-begin
-  yay_exists = system('command -v yay >/dev/null 2>&1')
-  if yay_exists
-    spinner.success(pastel.green(' yay is already installed.'))
-  else
-    spinner.update(title: 'Installing yay (AUR helper)...')
-    spinner.restart
-    Dir.mktmpdir do |tmp|
-      repo_dir = File.join(tmp, 'yay')
-      system! 'git', 'clone', 'https://aur.archlinux.org/yay.git', repo_dir
-      Dir.chdir(repo_dir) do
-        system! 'makepkg', '-si', '--noconfirm'
-      end
-    end
-    spinner.success(pastel.green(' yay installed successfully.'))
-  end
-rescue => e
-  spinner.error(pastel.red(' failed'))
-  warn e.message
-  exit 1
-end
+echo "[2/3] Checking AUR helper (yay)"
+if command -v yay >/dev/null 2>&1; then
+  echo "yay is already installed."
+else
+  echo "Installing yay (AUR helper)"
+  tmpdir=$(mktemp -d)
+  echo "Created temp dir: ${tmpdir}"
+  git clone https://aur.archlinux.org/yay.git "${tmpdir}/yay"
+  pushd "${tmpdir}/yay" >/dev/null
+  makepkg -si --noconfirm
+  popd >/dev/null
+  rm -rf "${tmpdir}"
+  echo "yay installed."
+fi
 
-# AUR パッケージのインストール
-spinner = TTY::Spinner.new('[:spinner] Installing AUR Packages...', format: :dots)
-spinner.auto_spin
-begin
-  system! 'yay', '-S', '--noconfirm', '--needed', *AUR_PACKAGES
-  spinner.success(pastel.green(' done'))
-rescue => e
-  spinner.error(pastel.red(' failed'))
-  warn e.message
-  exit 1
-end
+echo "[3/3] Installing AUR Packages"
+echo "yay -S --noconfirm --needed ${AUR_PACKAGES[*]}"
+yay -S --noconfirm --needed "${AUR_PACKAGES[@]}"
 
-footer = TTY::Box.frame(
-  width: 60,
-  height: 3,
-  padding: 1,
-  align: :center,
-  border: :thick,
-  style: { fg: :green, border: { fg: :green } }
-) { '✅ All packages installation sequence completed.' }
-
-puts footer
+echo "✅ Package installation sequence completed."
 

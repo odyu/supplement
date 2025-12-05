@@ -1,41 +1,18 @@
-#!/usr/bin/env ruby
-# frozen_string_literal: true
+#!/bin/bash
+set -euo pipefail
 
-# macOS用インストーラーのテンプレート
-require 'bundler/inline'
+echo ""
+echo "🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶"
+echo "🔶"
+echo "🔶   INSTALL SUPPLEMENT for macOS 🍎"
+echo "🔶"
+echo "🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶 🔶"
+echo ""
 
-gemfile do
-  source 'https://rubygems.org'
-  gem 'tty'
-end
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+echo "Script directory: ${SCRIPT_DIR}"
+echo "Home directory: ${HOME}"
 
-require 'tty-command'
-require 'tty-spinner'
-require 'tty-prompt'
-require 'tty-box'
-require 'pastel'
-require "fileutils"
-
-box = TTY::Box.frame(
-  width: 50,
-  height: 5,
-  padding: 1,
-  align: :center,
-  title: { top_left: ' SUPPLEMENT ' },
-  border: :thick,
-  style: {
-    fg: :cyan, # 枠線の色
-    border: { fg: :cyan }
-  }
-) do
-  'Install supplements for macOS.'
-end
-print box
-
-HOME_ROOT = File.expand_path("~")
-
-FileUtils.chdir HOME_ROOT do
-  puts "Start install supplements for macOS."
-  puts "pwd: #{Dir.pwd}"
-  puts "Finished install supplements for macOS."
-end
+echo ""
+echo "😄 FINISHED SUPPLEMENT"
+echo ""

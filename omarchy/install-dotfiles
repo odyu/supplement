@@ -1,28 +1,20 @@
-#!/usr/bin/env ruby
-# frozen_string_literal: true
+#!/bin/bash
+set -euo pipefail
 
-# Dotfiles installer (Ruby)
+echo "✨ [Dotfiles] Start"
 
-def run!(*cmd)
-  cmd = cmd.flatten
-  puts "▶ #{cmd.join(' ')}"
-  system(*cmd)
-  status = $?.exitstatus
-  if status != 0
-    warn "✖ Failed (exit #{status}): #{cmd.join(' ')}"
-    exit(status || 1)
-  end
-end
+HOME_DIR="${HOME}"
+DOTFILES_DIR="${HOME_DIR}/supplement/dotfiles"
 
-puts "✨ [Dotfiles] Start"
+echo "Home: ${HOME_DIR}"
+echo "Dotfiles dir: ${DOTFILES_DIR}"
 
-home = ENV["HOME"].to_s
-dotfiles_dir = File.expand_path(File.join(home, "supplement/dotfiles"))
-Dir.chdir(dotfiles_dir)
+cd "${DOTFILES_DIR}"
 
-# 既存ファイルがあってもエラーにせず、リンクに置き換える
-%w[zsh p10k ideavim].each do |pkg|
-  run! "stow", "-v", "-R", "--adopt", "--no-folding", "-t", home, pkg
-end
+packages=(zsh p10k ideavim)
+for pkg in "${packages[@]}"; do
+  echo "▶ stow -v -R --adopt --no-folding -t ${HOME_DIR} ${pkg}"
+  stow -v -R --adopt --no-folding -t "${HOME_DIR}" "${pkg}"
+done
 
-puts "🎉 [Dotfiles] Completed"
+echo "🎉 [Dotfiles] Completed"
