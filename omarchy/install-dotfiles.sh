@@ -33,4 +33,10 @@ echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} ideavim"
 stow -v -R --adopt --no-folding -t "${HOME_DIR}" ideavim
 echo ""
 
+echo "🔸 Deploy hyprland dotfiles"
+echo ""
+echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} hyprland"
+stow -v -R --adopt --no-folding -t "${HOME_DIR}" hyprland
+echo ""
+
 echo "🎉 Deploy dotfiles completed."
