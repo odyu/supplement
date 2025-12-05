@@ -10,8 +10,8 @@ install: status ## Omarchy と macOS 用の supplement をインストール
 	esac
 
 status: ## OSを表示し、git statusを確認
-	@chmod +x bin/status
-	@bin/status
+	@chmod +x bin/status.sh
+	@bin/status.sh
 
 help: ## 利用可能なターゲット一覧を表示
 	@echo "Usage: make <target>"; \
@@ -21,11 +21,12 @@ help: ## 利用可能なターゲット一覧を表示
 # --- Private / Internal Targets ---
 
 install-mac:
-	@chmod +x mac/install
-	@./mac/install
+	@chmod +x mac/install.sh
+	@./mac/install.sh
 
 install-omarchy:
-	@chmod +x omarchy/install
-	@./omarchy/install
+	@chmod +x omarchy/install.sh
+	@./omarchy/install.sh
 
 .PHONY: install status help install-mac install-omarchy
+
