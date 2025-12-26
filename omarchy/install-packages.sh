@@ -14,7 +14,6 @@ PACMAN_PACKAGES=(
   fcitx5-im
   fcitx5-mozc
   git
-  keyd
   neovim
   stow
   unzip
