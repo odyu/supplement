@@ -14,9 +14,15 @@ PACMAN_PACKAGES=(
   fcitx5-im
   fcitx5-mozc
   git
+  libffi
+  libyaml
   neovim
+  openssl
+  readline
+  rust
   stow
   unzip
+  zlib
   zsh
 )
 echo "sudo pacman -S --noconfirm --needed ${PACMAN_PACKAGES[@]}"
