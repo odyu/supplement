@@ -62,6 +62,27 @@ for env in "${TARGET_ENVS[@]}"; do
 done
 echo ""
 
+
+# ==========================================
+# RoBa / BLE Keyboard Connectivity Fixes
+# ==========================================
+
+# Bluetoothチップの省電力機能（勝手なスリープ）を殺す
+echo "options btusb enable_autosuspend=n" | sudo tee /etc/modprobe.d/bluetooth-disable-autosuspend.conf > /dev/null
+
+# 設定を反映させてカーネルイメージを更新
+if command -v mkinitcpio &> /dev/null; then
+    sudo mkinitcpio -P
+fi
+
+echo "✅ Bluetooth Power Management Disabled."
+
+
+
+
+
+
+
 echo "🎉 Setup packages completed."
 echo ""
 
