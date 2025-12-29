@@ -91,7 +91,7 @@ Omarchy 環境特有の設定やスクリプトを配置します。
 macOS 専用の設定やセットアップスクリプトを配置します。
 
 - install.sh  
-  Homebrew、anyenv、CLI ツールなどのインストールと、Mac でも共通で使う dotfiles の展開。
+  Homebrew、mise、CLI ツールなどのインストールと、Mac でも共通で使う dotfiles の展開。
 - karabiner.json などキーバインド関連。
 - そのほか mac 固有の設定ファイル。
 

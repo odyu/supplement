@@ -18,8 +18,7 @@ export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Plugins
-# anyenvを使う場合、rbenv/nodenvプラグインは競合の可能性がありますが補完用に残してもOK
-plugins=(git yarn aliases gem iterm2 npm rails rake rbenv node nodenv bundler)
+plugins=(git yarn aliases gem iterm2 npm rails rake bundler)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -27,11 +26,8 @@ source $ZSH/oh-my-zsh.sh
 # Tools
 # ==============================================================================
 
-# Load anyenv automatically
-if [ -d "$HOME/.anyenv" ]; then
-    export PATH="$HOME/.anyenv/bin:$PATH"
-    eval "$(anyenv init - zsh)"
-fi
+# Load mise automatically
+eval "$(mise activate zsh)"
 
 # ==============================================================================
 # OS Specific Settings

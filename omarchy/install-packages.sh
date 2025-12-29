@@ -42,14 +42,13 @@ yay -S --noconfirm --needed "${AUR_PACKAGES[@]}"
 echo ""
 
 
-echo "🔸 Install anyenv"
+echo "🔸 Install mise"
 echo ""
-ANYENV_DIR="$HOME/.anyenv"
-if [ -d "$ANYENV_DIR" ]; then
-  echo "✅ Anyenv already exists at $ANYENV_DIR, skipping install."
+if command -v mise &> /dev/null; then
+  echo "✅ mise already installed."
 else
-  echo "git clone https://github.com/anyenv/anyenv $ANYENV_DIR"
-  git clone https://github.com/anyenv/anyenv "$ANYENV_DIR"
+  echo "curl https://mise.run | sh"
+  curl https://mise.run | sh
 fi
 echo ""
 
