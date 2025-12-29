@@ -22,5 +22,47 @@ fi
 echo "✅ Bluetooth Power Management Disabled."
 echo ""
 
+# ==========================================
+# Lid Switch Configuration (MacBook)
+# ==========================================
+
+echo "🔸 Configuring Lid Switch Action"
+
+# 設定: 蓋を閉じた時の動作
+# "poweroff" = シャットダウン (カバンに入れるなら推奨)
+# "reboot"   = 再起動 (ログイン画面で待機)
+# "suspend"  = スリープ (デフォルト・MacBookでは不安定)
+LID_ACTION="poweroff"
+LOGIND_CONF="/etc/systemd/logind.conf"
+
+# バックアップ作成
+if [ ! -f "${LOGIND_CONF}.bak" ]; then
+    sudo cp "$LOGIND_CONF" "${LOGIND_CONF}.bak"
+fi
+
+# 設定変更のための関数
+set_logind_param() {
+    local param=$1
+    local value=$2
+    if grep -q "^$param=" "$LOGIND_CONF"; then
+        sudo sed -i "s/^$param=.*/$param=$value/" "$LOGIND_CONF"
+    else
+        echo "$param=$value" | sudo tee -a "$LOGIND_CONF" > /dev/null
+    fi
+}
+
+# 設定の適用
+# バッテリー駆動時・電源接続時ともに指定のアクション(poweroff)を実行
+set_logind_param "HandleLidSwitch" "$LID_ACTION"
+set_logind_param "HandleLidSwitchExternalPower" "$LID_ACTION"
+# 外部モニタ接続時(Docked)は何もしない
+set_logind_param "HandleLidSwitchDocked" "ignore"
+
+# 設定を即時反映
+sudo systemctl restart systemd-logind
+
+echo "✅ Lid Switch action set to: $LID_ACTION"
+echo ""
+
 echo "🎉 Setup hardwares completed."
 echo ""
