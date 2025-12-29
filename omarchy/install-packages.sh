@@ -24,6 +24,7 @@ PACMAN_PACKAGES=(
   unzip
   zlib
   zsh
+  libxslt
 )
 echo "sudo pacman -S --noconfirm --needed ${PACMAN_PACKAGES[@]}"
 sudo pacman -S --noconfirm --needed "${PACMAN_PACKAGES[@]}"
