@@ -10,11 +10,13 @@ echo "🔸 Install packages By PACMAN"
 echo ""
 PACMAN_PACKAGES=(
   base-devel
+  bluez-utils
   fcitx5-configtool
   fcitx5-im
   fcitx5-mozc
   git
   libffi
+  libxslt
   libyaml
   neovim
   openssl
@@ -24,9 +26,8 @@ PACMAN_PACKAGES=(
   unzip
   zlib
   zsh
-  libxslt
 )
-echo "sudo pacman -S --noconfirm --needed ${PACMAN_PACKAGES[@]}"
+echo "sudo pacman -S --noconfirm --needed ${PACMAN_PACKAGES[*]}"
 sudo pacman -S --noconfirm --needed "${PACMAN_PACKAGES[@]}"
 echo ""
 
@@ -34,11 +35,11 @@ echo ""
 echo "🔸 Install packages By AUR"
 echo ""
 AUR_PACKAGES=(
-  google-chrome
   bitwarden-bin
+  google-chrome
   jetbrains-toolbox
 )
-echo "yay -S --noconfirm --needed ${AUR_PACKAGES[@]}"
+echo "yay -S --noconfirm --needed ${AUR_PACKAGES[*]}"
 yay -S --noconfirm --needed "${AUR_PACKAGES[@]}"
 echo ""
 
