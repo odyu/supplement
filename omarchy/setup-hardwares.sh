@@ -22,6 +22,34 @@ fi
 echo "✅ Bluetooth Power Management Disabled."
 echo ""
 
+echo "🔸 Bluetooth Auto-Enable"
+# 起動時に必ずBluetoothをONにするように強制する
+BT_CONF="/etc/bluetooth/main.conf"
+
+# [Policy] セクションが存在しない場合は追記
+if ! grep -q "^\[Policy\]" "$BT_CONF" 2>/dev/null; then
+    echo -e "\n[Policy]" | sudo tee -a "$BT_CONF" > /dev/null
+fi
+
+# AutoEnable=true を設定
+if grep -q "^#\?AutoEnable=true" "$BT_CONF"; then
+    sudo sed -i "s/^#\?AutoEnable=true.*/AutoEnable=true/" "$BT_CONF"
+elif grep -q "^\[Policy\]" "$BT_CONF"; then
+    # [Policy] セクションの直後に挿入
+    sudo sed -i "/^\[Policy\]/a AutoEnable=true" "$BT_CONF"
+else
+    # 最終手段として末尾に追記
+    echo "AutoEnable=true" | sudo tee -a "$BT_CONF" > /dev/null
+fi
+
+# サービス再起動
+if systemctl is-active --quiet bluetooth; then
+    sudo systemctl restart bluetooth
+fi
+
+echo "✅ Bluetooth Auto-Enable configured."
+echo ""
+
 # ==========================================
 # Lid Switch Configuration (MacBook)
 # ==========================================
