@@ -58,33 +58,7 @@ echo "✅ Bluetooth Configuration optimized."
 echo ""
 
 # ==========================================
-# 2. Systemd Sleep Hook (Deploy from bin)
-# ==========================================
-
-echo "🔸 Installing Sleep/Wake Hook for RoBa"
-
-# ソース: リポジトリ内の bin/roba-reconnect
-SOURCE_BIN="$REPO_ROOT/bin/roba-reconnect"
-# ターゲット: systemdフック用ディレクトリ
-DEST_HOOK="/etc/systemd/system-sleep/roba-reconnect.sh"
-
-if [ -f "$SOURCE_BIN" ]; then
-    # ファイルをコピー
-    sudo cp "$SOURCE_BIN" "$DEST_HOOK"
-    # 実行権限を付与 (必須)
-    sudo chmod +x "$DEST_HOOK"
-
-    echo "✅ Hook installed from bin: $DEST_HOOK"
-else
-    echo "❌ Error: Source binary not found at $SOURCE_BIN"
-    # 開発中のパス不整合を防ぐため、ここでのexit 1は避け、警告にとどめるか選択可能
-    # exit 1
-fi
-
-echo ""
-
-# ==========================================
-# 3. Lid Switch Configuration
+# 2. Lid Switch Configuration
 # ==========================================
 
 echo "🔸 Configuring Lid Switch Action"
@@ -116,4 +90,3 @@ echo "✅ Lid Switch action set to: $LID_ACTION"
 echo ""
 
 echo "🎉 Setup hardwares completed."
-echo ""
