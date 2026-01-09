@@ -13,10 +13,10 @@ EnumerateSkipFirst=False
 ModifierOnlyKeyTimeout=250
 
 [Hotkey/ActivateKeys]
-0=Hangul
+0=Henkan
 
 [Hotkey/DeactivateKeys]
-0=Hangul_Hanja
+0=Muhenkan
 
 [Hotkey/AltTriggerKeys]
 0=Shift_L
