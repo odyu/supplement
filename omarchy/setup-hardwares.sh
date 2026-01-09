@@ -3,8 +3,6 @@ set -euo pipefail
 
 # スクリプトのディレクトリ解決
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-# リポジトリルート (install/config/ から ../.. でルートへ)
-REPO_ROOT=$(cd "$SCRIPT_DIR/../../" && pwd)
 
 echo "🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸"
 echo "🔸 Setup hardwares (Bin Distribution)"
@@ -52,6 +50,8 @@ update_bt_config "ReconnectIntervals" "1, 2, 4, 8, 16, 32, 64"
 
 if systemctl is-active --quiet bluetooth; then
     sudo systemctl restart bluetooth
+else
+    sudo systemctl enable --now bluetooth
 fi
 
 echo "✅ Bluetooth Configuration optimized."

@@ -8,7 +8,9 @@ echo "🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸🔸�
 echo ""
 
 HOME_DIR="${HOME}"
-DOTFILES_DIR="${HOME_DIR}/supplement/dotfiles"
+# スクリプトのディレクトリからリポジトリルートを解決
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+DOTFILES_DIR=$(cd "$SCRIPT_DIR/../dotfiles" && pwd)
 cd "${DOTFILES_DIR}"
 
 echo "Home directory: ${HOME_DIR}"
