@@ -1,132 +1,104 @@
-# ==============================================================================
-# Powerlevel10k Instant Prompt
-# ==============================================================================
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
+# If you come from bash you might have to change your $PATH.
+# export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
 
-# ==============================================================================
-# Common Environment
-# ==============================================================================
-export LANG=en_US.UTF-8
-
-# Path to your oh-my-zsh installation.
+# Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
-# Theme setting
-ZSH_THEME="powerlevel10k/powerlevel10k"
+# Set name of the theme to load --- if set to "random", it will
+# load a random theme each time Oh My Zsh is loaded, in which case,
+# to know which specific one was loaded, run: echo $RANDOM_THEME
+# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
+ZSH_THEME="robbyrussell"
 
-# Plugins
-plugins=(git yarn aliases gem iterm2 npm rails rake bundler)
+# Set list of themes to pick from when loading at random
+# Setting this variable when ZSH_THEME=random will cause zsh to load
+# a theme from this variable instead of looking in $ZSH/themes/
+# If set to an empty array, this variable will have no effect.
+# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
+
+# Uncomment the following line to use case-sensitive completion.
+# CASE_SENSITIVE="true"
+
+# Uncomment the following line to use hyphen-insensitive completion.
+# Case-sensitive completion must be off. _ and - will be interchangeable.
+# HYPHEN_INSENSITIVE="true"
+
+# Uncomment one of the following lines to change the auto-update behavior
+# zstyle ':omz:update' mode disabled  # disable automatic updates
+# zstyle ':omz:update' mode auto      # update automatically without asking
+# zstyle ':omz:update' mode reminder  # just remind me to update when it's time
+
+# Uncomment the following line to change how often to auto-update (in days).
+# zstyle ':omz:update' frequency 13
+
+# Uncomment the following line if pasting URLs and other text is messed up.
+# DISABLE_MAGIC_FUNCTIONS="true"
+
+# Uncomment the following line to disable colors in ls.
+# DISABLE_LS_COLORS="true"
+
+# Uncomment the following line to disable auto-setting terminal title.
+# DISABLE_AUTO_TITLE="true"
+
+# Uncomment the following line to enable command auto-correction.
+# ENABLE_CORRECTION="true"
+
+# Uncomment the following line to display red dots whilst waiting for completion.
+# You can also set it to another string to have that shown instead of the default red dots.
+# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
+# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
+# COMPLETION_WAITING_DOTS="true"
+
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# Uncomment the following line if you want to change the command execution time
+# stamp shown in the history command output.
+# You can set one of the optional three formats:
+# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+# or set a custom format using the strftime function format specifications,
+# see 'man strftime' for details.
+# HIST_STAMPS="mm/dd/yyyy"
+
+# Would you like to use another custom folder than $ZSH/custom?
+# ZSH_CUSTOM=/path/to/new-custom-folder
+
+# Which plugins would you like to load?
+# Standard plugins can be found in $ZSH/plugins/
+# Custom plugins may be added to $ZSH_CUSTOM/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+# Add wisely, as too many plugins slow down shell startup.
+plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
 
-# ==============================================================================
-# Tools
-# ==============================================================================
+# User configuration
 
-# Load mise automatically
-eval "$(mise activate zsh)"
+# export MANPATH="/usr/local/man:$MANPATH"
 
-# ==============================================================================
-# OS Specific Settings
-# ==============================================================================
+# You may need to manually set your language environment
+# export LANG=en_US.UTF-8
 
-case "$(uname -s)" in
-    Darwin*)
-        # ----------------------------------------------------------------------
-        # macOS Specific
-        # ----------------------------------------------------------------------
+# Preferred editor for local and remote sessions
+# if [[ -n $SSH_CONNECTION ]]; then
+#   export EDITOR='vim'
+# else
+#   export EDITOR='nvim'
+# fi
 
-        # --- Homebrew Setup ---
-        # 1. パスの追加 (Apple Silicon用)
-        # これを先にやらないと次の `type brew` が失敗します
-        if [ -x /opt/homebrew/bin/brew ]; then
-            export PATH="/opt/homebrew/bin:$PATH"
-        fi
+# Compilation flags
+# export ARCHFLAGS="-arch $(uname -m)"
 
-        # 2. Brew環境変数の読み込み & 依存設定
-        if type brew &>/dev/null; then
-            # Homebrew基本変数 (HOMEBREW_PREFIXなど)
-            eval "$(brew shellenv)"
-
-            # コンパイル用パス
-            export LIBRARY_PATH="$HOMEBREW_PREFIX/lib:$LIBRARY_PATH"
-            export CPATH="$HOMEBREW_PREFIX/include:$CPATH"
-
-            # Ruby build settings
-            export PATH="$HOMEBREW_PREFIX/opt/bison/bin:$PATH"
-            export LDFLAGS="-L$HOMEBREW_PREFIX/lib"
-            export PKG_CONFIG_PATH="$HOMEBREW_PREFIX/opt/libffi/lib/pkgconfig"
-            export RUBY_CFLAGS="-w"
-            export CPPFLAGS="-Wno-incompatible-function-pointer-types -Wno-implicit-function-declaration"
-
-            # zsh-completions
-            FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-            FPATH="$(brew --prefix)/share/zsh-completions:${FPATH}"
-            autoload -Uz compinit && compinit
-
-            # Homebrew middlewares (keg-only)
-            export PATH="$HOMEBREW_PREFIX/opt/jpeg/bin:$PATH"
-            export PATH="$HOMEBREW_PREFIX/opt/imagemagick@6/bin:$PATH"
-            export PATH="$HOMEBREW_PREFIX/opt/mysql@5.7/bin:$PATH"
-            export PATH="$HOMEBREW_PREFIX/opt/openjdk/bin:$PATH"
-        fi
-
-        # Mac Aliases
-        alias tailscale="/Applications/Tailscale.app/Contents/MacOS/Tailscale"
-        ;;
-
-    Linux*)
-        # ----------------------------------------------------------------------
-        # Linux (Omarchy) Specific
-        # ----------------------------------------------------------------------
-
-        # Pacman Aliases
-        alias pac="sudo pacman"
-        alias yay="yay --noconfirm"
-
-        # Color settings
-        if [[ -x /usr/bin/dircolors ]]; then
-            test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-            alias ls='ls --color=auto'
-        fi
-        ;;
-esac
-
-# ==============================================================================
-# Common Aliases
-# ==============================================================================
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-alias gs='git status'
-alias ga='git add'
-alias gc='git commit'
-alias gp='git push'
-alias gl='git pull'
-alias rm='rm -i'
-alias cp='cp -i'
-alias mv='mv -i'
-alias reload='source ~/.zshrc'
-
-# ==============================================================================
-# Theme Configuration
-# ==============================================================================
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-# ==============================================================================
-# Secrets & Local Settings
-# ==============================================================================
-
-# Load zshrc for secrets (Git ignored - for API Keys)
-[[ ! -f ~/.zshrc.secrets ]] || source ~/.zshrc.secrets
-
-# Load zshrc for local machine specific settings (Git ignored - for temp paths)
-[[ ! -f ~/.zshrc.local ]] || source ~/.zshrc.local
-
-# Ensure alias expansion is enabled
-# p10kの設定ファイルが一時的に無効化したまま戻らなかったため
-setopt aliases
+# Set personal aliases, overriding those provided by Oh My Zsh libs,
+# plugins, and themes. Aliases can be placed here, though Oh My Zsh
+# users are encouraged to define aliases within a top-level file in
+# the $ZSH_CUSTOM folder, with .zsh extension. Examples:
+# - $ZSH_CUSTOM/aliases.zsh
+# - $ZSH_CUSTOM/macos.zsh
+# For a full list of active aliases, run `alias`.
+#
+# Example aliases
+# alias zshconfig="mate ~/.zshrc"
+# alias ohmyzsh="mate ~/.oh-my-zsh"

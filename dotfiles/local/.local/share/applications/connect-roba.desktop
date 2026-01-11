@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Connect RoBa
+GenericName=Bluetooth Keyboard Connector
+Comment=Force connect to RoBa keyboard
+# インストールされるパスを指定 (PATHが通っている前提)
+Exec=connect-roba
+Icon=input-keyboard
+# 重要: ターミナルを表示して接続状況を見えるようにする
+Terminal=true
+Categories=System;Utility;Settings;
+Keywords=bluetooth;keyboard;roba;connect;

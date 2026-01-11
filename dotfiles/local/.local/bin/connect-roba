@@ -1,0 +1,46 @@
+#!/bin/bash
+# 目的: RoBaのMACアドレスを動的に取得し、接続を確立する
+
+echo "🔍 Searching for RoBa..."
+
+# 1. Bluetoothコントローラーを確実にON
+bluetoothctl power on > /dev/null 2>&1
+
+# 2. MACアドレスの取得
+# ペアリング済みリストから "roBa" を検索
+MAC_ADDR=$(bluetoothctl devices | grep "roBa" | awk '{print $2}' | head -n 1)
+
+# ペアリングされていない、または見つからない場合
+if [ -z "$MAC_ADDR" ]; then
+    echo "⚠️  RoBa not found in paired devices."
+    echo "📡 Scanning for 5 seconds..."
+    bluetoothctl --timeout 5 scan on > /dev/null 2>&1
+    # 再取得試行
+    MAC_ADDR=$(bluetoothctl devices | grep "roBa" | awk '{print $2}' | head -n 1)
+fi
+
+if [ -z "$MAC_ADDR" ]; then
+    echo "❌ RoBa device could not be found. Is it in pairing mode?"
+    echo "Press Enter to exit..."
+    read
+    exit 1
+fi
+
+echo "🎯 Target Found: $MAC_ADDR"
+echo "🔄 Connecting..."
+
+# 3. 接続ループ (繋がるまで粘る)
+while true; do
+    # 接続を試行
+    if bluetoothctl connect "$MAC_ADDR"; then
+        echo ""
+        echo "✅ Connection Successful!"
+        echo "   Closing in 3 seconds..."
+        sleep 3
+        break
+    else
+        echo "⚠️  Connection failed. Retrying in 2 seconds..."
+        echo "   (Press Ctrl+C to stop)"
+        sleep 2
+    fi
+done

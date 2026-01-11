@@ -47,4 +47,11 @@ echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} fcitx5"
 stow -v -R --adopt --no-folding -t "${HOME_DIR}" fcitx5
 echo ""
 
+echo "🔸 Deploy local dotfiles"
+echo ""
+echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} local"
+stow -v -R --adopt --no-folding -t "${HOME_DIR}" local
+echo ""
+
 echo "🎉 Deploy dotfiles completed."
+

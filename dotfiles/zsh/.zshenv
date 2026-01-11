@@ -1,1 +1,1 @@
-export PATH="$HOME/.anyenv/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
