@@ -84,9 +84,18 @@ set_logind_param "HandleLidSwitch" "$LID_ACTION"
 set_logind_param "HandleLidSwitchExternalPower" "$LID_ACTION"
 set_logind_param "HandleLidSwitchDocked" "ignore"
 
-sudo systemctl restart systemd-logind
+# sudo systemctl restart systemd-logind
 
 echo "✅ Lid Switch action set to: $LID_ACTION"
+echo ""
+
+# ==========================================
+# 3. Timezone Configuration
+# ==========================================
+
+echo "🔸 Setting Timezone to Asia/Tokyo"
+sudo timedatectl set-timezone Asia/Tokyo
+echo "✅ Timezone set to Asia/Tokyo."
 echo ""
 
 echo "🎉 Setup hardwares completed."
