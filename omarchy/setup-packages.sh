@@ -38,6 +38,31 @@ echo ""
 
 
 
+echo "🔸 Setup Waybar overrides"
+echo ""
+WAYBAR_CONFIG_PATH="${HOME}/.config/waybar"
+if [ -f "$WAYBAR_CONFIG_PATH/config.jsonc" ]; then
+  if ! grep -q "overrides.jsonc" "$WAYBAR_CONFIG_PATH/config.jsonc"; then
+    # 最初の { の後に挿入
+    sed -i '0,/{/s|{|{\n    "include": [ "~/.config/waybar/overrides.jsonc" ],|' "$WAYBAR_CONFIG_PATH/config.jsonc"
+    echo "✅ Successfully added overrides.jsonc include to waybar config!"
+  else
+    echo "✅ overrides.jsonc include is already added to waybar config"
+  fi
+fi
+
+if [ -f "$WAYBAR_CONFIG_PATH/style.css" ]; then
+  if ! grep -q "@import \"overrides.css\"" "$WAYBAR_CONFIG_PATH/style.css"; then
+    echo "" >> "$WAYBAR_CONFIG_PATH/style.css"
+    echo '@import "overrides.css";' >> "$WAYBAR_CONFIG_PATH/style.css"
+    echo "✅ Successfully added overrides.css import to waybar style!"
+  else
+    echo "✅ overrides.css import is already added to waybar style"
+  fi
+fi
+echo ""
+
+
 
 echo "🎉 Setup packages completed."
 echo ""

@@ -1,0 +1,24 @@
+{
+    // 1. バーの高さを増やす (アイコン拡大に合わせて調整)
+    "height": 34,
+
+    // 2. 右側モジュールの全表示 (Drawer/グループ化を解除して再定義)
+    // 元の config.jsonc の "modules-right" をコピーし、group/hardware を展開して記述
+    "modules-right": [
+        "network",
+        "bluetooth",
+        "pulseaudio",
+        "battery",
+        "tray",
+        "clock"
+    ],
+
+    // 3. 日本時間の設定 (時計モジュールの再定義)
+    "clock": {
+        // システム設定(timedatectl)が優先ですが、念のためWaybar側でも指定可能
+        "timezone": "Asia/Tokyo",
+        "format": "{:%H:%M}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "format-alt": "{:%Y-%m-%d}"
+    }
+}
