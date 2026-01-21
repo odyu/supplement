@@ -1,4 +1,4 @@
-# supplement
+# Supplement
 
 Omarchy（Arch Linux）と macOS 向けの dotfiles・環境セットアップスクリプト・上書き設定（overrides）をまとめたリポジトリです。  
 共通の開発環境と各OS固有の差分を一元管理して、再セットアップや新規マシン構築を簡単にすることを目的としています。
