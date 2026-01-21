@@ -16,11 +16,13 @@ PACMAN_PACKAGES=(
   fcitx5-im
   fcitx5-mozc
   git
+  keyd
   libffi
   libxslt
   libyaml
   neovim
   openssl
+  python
   readline
   rust
   stow

@@ -98,4 +98,43 @@ sudo timedatectl set-timezone Asia/Tokyo
 echo "✅ Timezone set to Asia/Tokyo."
 echo ""
 
+# ==========================================
+# 4. Keyd Configuration (Mac Parity)
+# ==========================================
+
+echo "🔸 Configuring keyd"
+
+sudo mkdir -p /etc/keyd
+sudo cp "${SCRIPT_DIR}/keyd/default.conf" /etc/keyd/default.conf
+
+sudo systemctl enable --now keyd
+
+# Add user to keyd group (required for socket communication)
+sudo usermod -aG keyd "$USER"
+
+# Setup keyd-application-mapper as a user service
+USER_SYSTEMD_DIR="${HOME}/.config/systemd/user"
+mkdir -p "${USER_SYSTEMD_DIR}"
+
+cat > "${USER_SYSTEMD_DIR}/keyd-application-mapper.service" << EOF
+[Unit]
+Description=Keyd Application Mapper
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/keyd-application-mapper
+Restart=always
+
+[Install]
+WantedBy=default.target
+EOF
+
+systemctl --user daemon-reload
+systemctl --user enable --now keyd-application-mapper
+
+echo "✅ keyd and application mapper configured."
+echo ""
+
 echo "🎉 Setup hardwares completed."
