@@ -26,10 +26,9 @@ cat << EOF > "${OUTPUT_FILE}"
 EOF
 
 # 4. キーバインドの自動変換 (Core Logic)
-# jq を使用して SUPER を ALT に置換
-# modmask: SHIFT=1, CTRL=4, ALT=8, SUPER=64
+# 修正点: .key が空の場合は code:xxx を使用するように変更
 hyprctl binds -j | jq -r '
-  .[] | 
+  .[] |
   select((.modmask / 64 | floor % 2 == 1) and (.modmask / 8 | floor % 2 == 0)) |
   (
     (if (.modmask / 1 | floor % 2 == 1) then "SHIFT" else "" end) +
@@ -40,9 +39,14 @@ hyprctl binds -j | jq -r '
     (if (.modmask / 1 | floor % 2 == 1) then "SHIFT " else "" end) +
     (if (.modmask / 4 | floor % 2 == 1) then "CTRL " else "" end)
   ) as $mods |
+
+  # --- 修正: キー名安全化ロジック ---
+  # キー名が存在し、長さが1以上ならそれを使う。ダメならキーコードを使う。
+  (if (.key and (.key | length > 0)) then .key else "code:" + (.keycode | tostring) end) as $safe_key |
+
   (
-    "\($mods_raw)_\(.key)_1_unbind unbind = SUPER \($mods), \(.key)\n" +
-    "\($mods_raw)_\(.key)_2_bind bind = ALT \($mods), \(.key), \(.dispatcher), \(.arg)"
+    "\($mods_raw)_\($safe_key)_1_unbind unbind = SUPER \($mods), \($safe_key)\n" +
+    "\($mods_raw)_\($safe_key)_2_bind bind = ALT \($mods), \($safe_key), \(.dispatcher), \(.arg)"
   )
 ' | sort -u | awk '
   {
@@ -50,11 +54,11 @@ hyprctl binds -j | jq -r '
     key = $1
     base_key = key
     sub(/_[12]_(unbind|bind)$/, "", base_key)
-    
+
     # ソート用キーを削除
     $1 = ""
     sub(/^ /, "")
-    
+
     # 前のベースキーと異なる場合（かつ最初ではない場合）、空行を挿入
     if (prev_base_key != "" && prev_base_key != base_key) {
       print ""
