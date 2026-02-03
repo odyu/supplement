@@ -49,15 +49,20 @@ link_personal_scripts() {
       echo "Missing script: ${src}"
       exit 1
     fi
+    chmod +x "${src}"
     ln -sf "${src}" "${TARGET_DIR}/${script}"
   done
 }
 
 run_omakub() {
+  echo "Triggering Omakub..."
   if command -v omakub >/dev/null 2>&1; then
     omakub
+  elif [ -x "${HOME}/.local/bin/omakub" ]; then
+    "${HOME}/.local/bin/omakub"
   else
-    echo "omakub command not found. Install Omakub base first."
+    echo "Error: 'omakub' command not found."
+    echo "Please restart your shell and run 'omakub' manually."
     exit 1
   fi
 }

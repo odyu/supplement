@@ -49,7 +49,7 @@ configure_bluetooth() {
 
 configure_lid_switch() {
   echo "Configuring lid switch action"
-  local lid_action="poweroff"
+  local lid_action="suspend"
   local logind_conf="/etc/systemd/logind.conf"
 
   if [ ! -f "${logind_conf}.bak" ]; then
