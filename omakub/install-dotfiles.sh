@@ -4,6 +4,13 @@ set -euo pipefail
 echo "=== Deploy dotfiles ==="
 echo ""
 
+if ! command -v stow >/dev/null 2>&1; then
+  echo "stow not found, installing."
+  sudo apt update
+  sudo apt install -y stow
+  echo ""
+fi
+
 HOME_DIR="${HOME}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$(cd "${SCRIPT_DIR}/../dotfiles" && pwd)"
