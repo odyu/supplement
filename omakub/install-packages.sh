@@ -16,22 +16,37 @@ sudo apt update
 sudo apt install -y "${APT_PACKAGES[@]}"
 echo ""
 
-echo "Installing JetBrains Toolbox (AppImage)"
-TOOLBOX_APPIMAGE_URL="${TOOLBOX_APPIMAGE_URL:-https://download.jetbrains.com/toolbox/jetbrains-toolbox.AppImage}"
+echo "Installing JetBrains Toolbox (tar.gz)"
+TOOLBOX_TARBALL_URL="${TOOLBOX_TARBALL_URL:-https://data.services.jetbrains.com/products/download?code=TBA&platform=linux}"
 TOOLBOX_DIR="${HOME}/.local/bin"
-TOOLBOX_APPIMAGE_PATH="${TOOLBOX_DIR}/jetbrains-toolbox.AppImage"
+TOOLBOX_BIN_PATH="${TOOLBOX_DIR}/jetbrains-toolbox"
 if [ -d "/opt/jetbrains-toolbox" ]; then
   echo "JetBrains Toolbox already installed at /opt/jetbrains-toolbox, skipping download."
-elif [ -f "${TOOLBOX_APPIMAGE_PATH}" ]; then
-  echo "JetBrains Toolbox AppImage already exists at ${TOOLBOX_APPIMAGE_PATH}, skipping download."
+elif [ -f "${TOOLBOX_BIN_PATH}" ]; then
+  echo "JetBrains Toolbox already exists at ${TOOLBOX_BIN_PATH}, skipping download."
 else
   mkdir -p "${TOOLBOX_DIR}"
-  if ! curl -fL "${TOOLBOX_APPIMAGE_URL}" -o "${TOOLBOX_APPIMAGE_PATH}"; then
-    echo "Failed to download JetBrains Toolbox AppImage from ${TOOLBOX_APPIMAGE_URL}"
-    echo "Set TOOLBOX_APPIMAGE_URL to a valid AppImage URL and re-run."
+  TOOLBOX_TMP_DIR="$(mktemp -d)"
+  TOOLBOX_TARBALL="${TOOLBOX_TMP_DIR}/jetbrains-toolbox.tar.gz"
+  cleanup_toolbox_tmp() {
+    rm -rf "${TOOLBOX_TMP_DIR}"
+  }
+  trap cleanup_toolbox_tmp EXIT
+  if ! curl -fL "${TOOLBOX_TARBALL_URL}" -o "${TOOLBOX_TARBALL}"; then
+    echo "Failed to download JetBrains Toolbox tarball from ${TOOLBOX_TARBALL_URL}"
+    echo "Set TOOLBOX_TARBALL_URL to a valid tar.gz URL and re-run."
     exit 1
   fi
-  chmod +x "${TOOLBOX_APPIMAGE_PATH}"
+  tar -xzf "${TOOLBOX_TARBALL}" -C "${TOOLBOX_TMP_DIR}"
+  TOOLBOX_EXTRACTED_BIN="$(find "${TOOLBOX_TMP_DIR}" -type f -name jetbrains-toolbox -print -quit)"
+  if [ -z "${TOOLBOX_EXTRACTED_BIN}" ]; then
+    echo "Failed to locate jetbrains-toolbox binary after extraction."
+    exit 1
+  fi
+  mv "${TOOLBOX_EXTRACTED_BIN}" "${TOOLBOX_BIN_PATH}"
+  chmod +x "${TOOLBOX_BIN_PATH}"
+  trap - EXIT
+  cleanup_toolbox_tmp
 fi
 echo ""
 
