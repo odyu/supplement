@@ -31,16 +31,9 @@ install_dependencies() {
   fi
 }
 
-run_personal_scripts() {
-  local scripts=(
-    "install-packages.sh"
-    "install-dotfiles.sh"
-    "setup-hardware.sh"
-    "setup-packages.sh"
-  )
-
+run_scripts() {
   local script
-  for script in "${scripts[@]}"; do
+  for script in "$@"; do
     local src="${WORK_DIR}/omakub/${script}"
     if [ ! -f "${src}" ]; then
       echo "Missing script: ${src}"
@@ -54,7 +47,8 @@ while true; do
   echo "=== Omakub T2 Setup Menu ==="
   echo "1) Install T2 Firmware (Wi-Fi/Bluetooth)"
   echo "2) Install Omakub Base System"
-  echo "3) Run Personal Setup (Packages & Dotfiles)"
+  echo "3) Sync Apps & Dotfiles (Idempotent)"
+  echo "4) System Setup (Initial/One-time)"
   echo "q) Quit"
   echo ""
   read -r -p "Select an option: " choice || true
@@ -82,12 +76,20 @@ while true; do
       exit 0
       ;;
     3)
-      if ! confirm_or_return "Run Personal Setup (Packages & Dotfiles)"; then
+      if ! confirm_or_return "Sync Apps & Dotfiles (Idempotent)"; then
         continue
       fi
       install_dependencies
-      run_personal_scripts
-      echo "All setup complete!"
+      run_scripts "install-packages.sh" "install-dotfiles.sh"
+      echo "Sync complete!"
+      exit 0
+      ;;
+    4)
+      if ! confirm_or_return "System Setup (Initial/One-time)"; then
+        continue
+      fi
+      run_scripts "setup-hardware.sh" "setup-packages.sh"
+      echo "System setup complete!"
       exit 0
       ;;
     q|Q)
@@ -95,7 +97,7 @@ while true; do
       exit 0
       ;;
     *)
-      echo "Invalid selection. Please choose 1, 2, 3, or q."
+      echo "Invalid selection. Please choose 1, 2, 3, 4, or q."
       echo ""
       ;;
   esac
