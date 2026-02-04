@@ -4,12 +4,18 @@ set -euo pipefail
 echo "=== 05-install-jetbrains.sh ==="
 echo "Installing JetBrains Toolbox..."
 
+# 1. 必須ライブラリのインストール (これが足りないと起動しません)
+echo "Installing dependencies (libfuse2)..."
+sudo apt update
+sudo apt install -y libfuse2
+
+# 2. 変数定義
 TOOLBOX_TARBALL_URL="https://data.services.jetbrains.com/products/download?code=TBA&platform=linux"
 INSTALL_DIR="${HOME}/.local/bin"
 TOOLBOX_BIN_PATH="${INSTALL_DIR}/jetbrains-toolbox"
 
+# 3. インストール処理
 mkdir -p "${INSTALL_DIR}"
-
 TMP_DIR="$(mktemp -d)"
 TARBALL="${TMP_DIR}/jetbrains-toolbox.tar.gz"
 
@@ -37,3 +43,4 @@ echo "Installing to ${TOOLBOX_BIN_PATH}..."
 install -m 0755 "${EXTRACTED_BIN}" "${TOOLBOX_BIN_PATH}"
 
 echo "JetBrains Toolbox installation completed."
+echo "Try running: ~/.local/bin/jetbrains-toolbox"
