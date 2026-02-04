@@ -1,48 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "=== 03-setup-hardware.sh (Safe Mode) ==="
-echo "Applying userspace hardware settings..."
-
-# --- 危険なカーネル変更処理を削除 ---
-# T2 Macでのクラッシュを防ぐため、update-initramfs と modprobe は行わない
-# ------------------------------------
-
-configure_bluetooth() {
-  echo "Tuning Bluetooth configuration (/etc/bluetooth/main.conf)..."
-  local bt_conf="/etc/bluetooth/main.conf"
-
-  # 設定ファイルの書き換えのみ行う（再起動不要・安全）
-  update_bt_config() {
-    local param=$1
-    local value=$2
-    if grep -q "^#\?${param}\s*=" "${bt_conf}"; then
-      sudo sed -i "s/^#\?${param}\s*=.*/${param} = ${value}/" "${bt_conf}"
-    else
-      echo "${param} = ${value}" | sudo tee -a "${bt_conf}" > /dev/null
-    fi
-  }
-
-  if [ -f "${bt_conf}" ]; then
-    if ! grep -q "^\[Policy\]" "${bt_conf}" 2>/dev/null; then
-      echo -e "\n[Policy]" | sudo tee -a "${bt_conf}" > /dev/null
-    fi
-
-    update_bt_config "AutoEnable" "true"
-    update_bt_config "FastConnectable" "true"
-    update_bt_config "ReconnectAttempts" "7"
-    update_bt_config "ReconnectIntervals" "1, 2, 4, 8, 16, 32, 64"
-
-    if systemctl is-active --quiet bluetooth; then
-      sudo systemctl restart bluetooth
-    else
-      sudo systemctl enable --now bluetooth
-    fi
-    echo "Bluetooth configuration updated (Userspace only)."
-  else
-    echo "Warning: ${bt_conf} not found. Skipping Bluetooth tuning."
-  fi
-}
+echo "=== 03-setup-hardware.sh (Audio & Lid) ==="
+echo "Configuring hardware behaviors..."
 
 configure_lid_switch() {
   echo "Configuring lid switch action..."
@@ -67,7 +27,7 @@ configure_lid_switch() {
 
     set_logind_param "HandleLidSwitch" "${lid_action}"
     set_logind_param "HandleLidSwitchExternalPower" "${lid_action}"
-    set_logind_param "HandleLidSwitchDocked" "ignore"
+    set_logind_param "HandleLidSwitchDocked" "${lid_action}"
     
     # logindのみ再起動（OS再起動は不要）
     sudo systemctl restart systemd-logind
@@ -77,7 +37,48 @@ configure_lid_switch() {
   fi
 }
 
-configure_bluetooth
-configure_lid_switch
+configure_audio_safety() {
+  echo "Applying T2 Mac Audio Safety (UCM profiles)..."
+  
+  local tmp_dir
+  tmp_dir=$(mktemp -d)
 
-echo "Hardware setup completed (No reboot required)."
+  # 1. Clone the t2linux/audio-config repository
+  echo "Cloning t2linux/audio-config..."
+  if git clone --depth 1 https://github.com/t2linux/audio-config "${tmp_dir}"; then
+    
+    # 2. Copy UCM2 profiles to /usr/share/alsa/ucm2/
+    if [ -d "${tmp_dir}/ucm2" ]; then
+      echo "Copying UCM2 profiles..."
+      sudo mkdir -p /usr/share/alsa/ucm2
+      sudo cp -r "${tmp_dir}/ucm2/"* /usr/share/alsa/ucm2/
+    fi
+
+    # 3. Copy audio config files to /etc/modprobe.d/
+    if [ -d "${tmp_dir}/conf" ]; then
+      echo "Applying modprobe configurations..."
+      sudo cp "${tmp_dir}/conf/"*.conf /etc/modprobe.d/ 2>/dev/null || true
+    fi
+
+    # 4. Reload PipeWire/PulseAudio
+    echo "Reloading audio services..."
+    if command -v systemctl >/dev/null && [ -n "${USER:-}" ]; then
+      # Reload PipeWire/WirePlumber if present
+      systemctl --user restart pipewire pipewire-pulse wireplumber 2>/dev/null || true
+    fi
+    # Also attempt to kill pulseaudio to force reload if not using pipewire
+    pulseaudio -k 2>/dev/null || true
+    
+    echo "Audio safety configuration completed."
+  else
+    echo "Error: Failed to clone audio-config repository. Skipping audio setup."
+  fi
+
+  # Cleanup
+  rm -rf "${tmp_dir}"
+}
+
+configure_lid_switch
+configure_audio_safety
+
+echo "Hardware setup completed."
