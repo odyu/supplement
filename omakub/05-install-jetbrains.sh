@@ -6,8 +6,9 @@ echo "Installing JetBrains Toolbox..."
 
 # 1. 必須ライブラリのインストール (これが足りないと起動しません)
 echo "Installing dependencies (libfuse2)..."
+# AppImageやGUIアプリに必要なライブラリをまとめて入れる
 sudo apt update
-sudo apt install -y libfuse2
+sudo apt install -y libfuse2 libxi6 libxrender1 libxtst6 mesa-utils libfontconfig libdbus-1-3
 
 # 2. 変数定義
 TOOLBOX_TARBALL_URL="https://data.services.jetbrains.com/products/download?code=TBA&platform=linux"
