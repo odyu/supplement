@@ -19,7 +19,9 @@ fi
 if [ -f "${TOSHY_DIR}/setup_toshy.py" ]; then
   echo "Running Toshy setup..."
   cd "${TOSHY_DIR}"
-  sudo ./setup_toshy.py install
+  # 修正: sudo を削除しました。
+  # Toshyは一般ユーザーで実行する必要があります（内部で必要に応じてパスワードを聞かれます）。
+  ./setup_toshy.py install
 else
   echo "Error: Toshy setup script not found at ${TOSHY_DIR}/setup_toshy.py"
   exit 1
