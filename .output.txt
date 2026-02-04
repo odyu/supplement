@@ -1,0 +1,304 @@
+#!/bin/bash
+set -euo pipefail
+WORK_DIR="$(pwd -P)"
+confirm_or_return() {
+  local option_name="$1"
+  local reply
+  read -r -p "Ready to execute ${option_name}. Are you sure? [y/N]: " reply || true
+  case "${reply}" in
+    [Yy]|[Yy][Ee][Ss]) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+install_dependencies() {
+  local packages=()
+  if ! command -v stow >/dev/null 2>&1; then
+    packages+=("stow")
+  fi
+  if ! command -v curl >/dev/null 2>&1; then
+    packages+=("curl")
+  fi
+  if ! command -v git >/dev/null 2>&1; then
+    packages+=("git")
+  fi
+  if [ "${#packages[@]}" -gt 0 ]; then
+    sudo apt update
+    sudo apt install -y "${packages[@]}"
+  fi
+}
+run_scripts() {
+  local script
+  for script in "$@"; do
+    local src="${WORK_DIR}/omakub/${script}"
+    if [ ! -f "${src}" ]; then
+      echo "Missing script: ${src}"
+      exit 1
+    fi
+    bash "${src}"
+  done
+}
+while true; do
+  echo "=== Omakub T2 Setup Menu ==="
+  echo "1) Install T2 Firmware (Wi-Fi/Bluetooth)"
+  echo "2) Install Omakub Base System"
+  echo "3) Sync Apps & Dotfiles (Idempotent)"
+  echo "4) System Setup (Initial/One-time)"
+  echo "q) Quit"
+  echo ""
+  read -r -p "Select an option: " choice || true
+  echo ""
+  case "${choice}" in
+    1)
+      if ! confirm_or_return "Install T2 Firmware (Wi-Fi/Bluetooth)"; then
+        continue
+      fi
+      if ! sudo get-apple-firmware get_from_online; then
+        echo "Firmware download failed."
+        echo "Try a different firmware version or keep a smartphone screen on nearby and retry."
+        exit 1
+      fi
+      echo "Installation Complete. Please REBOOT your Mac now."
+      exit 0
+      ;;
+    2)
+      if ! confirm_or_return "Install Omakub Base System"; then
+        continue
+      fi
+      wget -qO- https://omakub.org/install | bash
+      echo "Omakub Base installed."
+      exit 0
+      ;;
+    3)
+      if ! confirm_or_return "Sync Apps & Dotfiles (Idempotent)"; then
+        continue
+      fi
+      install_dependencies
+      run_scripts "install-packages.sh" "install-dotfiles.sh"
+      echo "Sync complete!"
+      exit 0
+      ;;
+    4)
+      if ! confirm_or_return "System Setup (Initial/One-time)"; then
+        continue
+      fi
+      run_scripts "setup-hardware.sh" "setup-packages.sh"
+      echo "System setup complete!"
+      exit 0
+      ;;
+    q|Q)
+      echo "Exiting."
+      exit 0
+      ;;
+    *)
+      echo "Invalid selection. Please choose 1, 2, 3, 4, or q."
+      echo ""
+      ;;
+  esac
+done
+#!/bin/bash
+set -euo pipefail
+echo "=== Install packages ==="
+echo ""
+echo "Installing package prerequisites"
+APT_PACKAGES=(
+  curl
+  git
+  libfuse2
+  stow
+  zsh
+)
+sudo apt update
+sudo apt install -y "${APT_PACKAGES[@]}"
+echo ""
+echo "Installing Oh My Zsh"
+if [ -d "${HOME}/.oh-my-zsh" ]; then
+  echo "Oh My Zsh already installed."
+else
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
+echo ""
+echo "Installing JetBrains Toolbox (tar.gz)"
+TOOLBOX_TARBALL_URL="${TOOLBOX_TARBALL_URL:-https://data.services.jetbrains.com/products/download?code=TBA&platform=linux}"
+TOOLBOX_DIR="${HOME}/.local/bin"
+TOOLBOX_BIN_PATH="${TOOLBOX_DIR}/jetbrains-toolbox"
+mkdir -p "${TOOLBOX_DIR}"
+TOOLBOX_TMP_DIR="$(mktemp -d)"
+TOOLBOX_TARBALL="${TOOLBOX_TMP_DIR}/jetbrains-toolbox.tar.gz"
+cleanup_toolbox_tmp() {
+  rm -rf "${TOOLBOX_TMP_DIR}"
+}
+trap cleanup_toolbox_tmp EXIT
+if ! curl -fL "${TOOLBOX_TARBALL_URL}" -o "${TOOLBOX_TARBALL}"; then
+  echo "Failed to download JetBrains Toolbox tarball from ${TOOLBOX_TARBALL_URL}"
+  echo "Set TOOLBOX_TARBALL_URL to a valid tar.gz URL and re-run."
+  exit 1
+fi
+tar -xzf "${TOOLBOX_TARBALL}" -C "${TOOLBOX_TMP_DIR}"
+TOOLBOX_EXTRACTED_BIN="$(find "${TOOLBOX_TMP_DIR}" -type f -name jetbrains-toolbox -print -quit)"
+if [ -z "${TOOLBOX_EXTRACTED_BIN}" ]; then
+  echo "Failed to locate jetbrains-toolbox binary after extraction."
+  exit 1
+fi
+install -m 0755 "${TOOLBOX_EXTRACTED_BIN}" "${TOOLBOX_BIN_PATH}"
+trap - EXIT
+cleanup_toolbox_tmp
+echo ""
+echo "Installing Toshy"
+TOSHY_DIR="${HOME}/toshy"
+if [ -d "${TOSHY_DIR}/.git" ]; then
+  echo "Updating Toshy at ${TOSHY_DIR}"
+  if ! git -C "${TOSHY_DIR}" pull --ff-only; then
+    echo "Toshy update failed; keeping existing checkout."
+  fi
+elif [ -d "${TOSHY_DIR}" ]; then
+  echo "Toshy directory exists but is not a git repo, skipping clone."
+else
+  (cd "${HOME}" && git clone https://github.com/RedBearAK/toshy.git)
+fi
+if [ -f "${TOSHY_DIR}/setup_toshy.py" ]; then
+  if [ -x "${TOSHY_DIR}/setup_toshy.py" ]; then
+    (cd "${TOSHY_DIR}" && sudo ./setup_toshy.py install)
+  else
+    (cd "${TOSHY_DIR}" && sudo python3 ./setup_toshy.py install)
+  fi
+else
+  echo "Toshy setup script not found at ${TOSHY_DIR}/setup_toshy.py"
+fi
+echo ""
+echo "Installing mise"
+MISE_BIN=""
+if command -v mise >/dev/null 2>&1; then
+  MISE_BIN="$(command -v mise)"
+elif [ -x "${HOME}/.local/bin/mise" ]; then
+  MISE_BIN="${HOME}/.local/bin/mise"
+else
+  echo "curl https://mise.run | sh"
+  curl https://mise.run | sh
+  MISE_BIN="${HOME}/.local/bin/mise"
+fi
+if [ ! -x "${MISE_BIN}" ]; then
+  echo "mise binary not found at ${MISE_BIN}"
+  exit 1
+fi
+"${MISE_BIN}" use -g github-cli lazygit
+echo ""
+echo "Package installation completed."
+#!/bin/bash
+set -euo pipefail
+echo "=== Setup hardware (Ubuntu) ==="
+echo ""
+configure_bluetooth() {
+  echo "Configuring Bluetooth power management"
+  echo "options btusb enable_autosuspend=n" | sudo tee /etc/modprobe.d/bluetooth-disable-autosuspend.conf > /dev/null
+  if command -v update-initramfs &> /dev/null; then
+    sudo update-initramfs -u
+  fi
+  echo "Bluetooth autosuspend disabled."
+  echo ""
+  echo "Tuning Bluetooth configuration"
+  local bt_conf="/etc/bluetooth/main.conf"
+  update_bt_config() {
+    local param=$1
+    local value=$2
+    if grep -q "^#\\?${param}\\s*=" "${bt_conf}"; then
+      sudo sed -i "s/^#\\?${param}\\s*=.*/${param} = ${value}/" "${bt_conf}"
+    else
+      echo "${param} = ${value}" | sudo tee -a "${bt_conf}" > /dev/null
+    fi
+  }
+  if ! grep -q "^\\[Policy\\]" "${bt_conf}" 2>/dev/null; then
+    echo -e "\n[Policy]" | sudo tee -a "${bt_conf}" > /dev/null
+  fi
+  update_bt_config "AutoEnable" "true"
+  update_bt_config "FastConnectable" "true"
+  update_bt_config "ReconnectAttempts" "7"
+  update_bt_config "ReconnectIntervals" "1, 2, 4, 8, 16, 32, 64"
+  if systemctl is-active --quiet bluetooth; then
+    sudo systemctl restart bluetooth
+  else
+    sudo systemctl enable --now bluetooth
+  fi
+  echo "Bluetooth configuration optimized."
+  echo ""
+}
+configure_lid_switch() {
+  echo "Configuring lid switch action"
+  local lid_action="suspend"
+  local logind_conf="/etc/systemd/logind.conf"
+  if [ ! -f "${logind_conf}.bak" ]; then
+    sudo cp "${logind_conf}" "${logind_conf}.bak"
+  fi
+  set_logind_param() {
+    local param=$1
+    local value=$2
+    if grep -q "^${param}=" "${logind_conf}"; then
+      sudo sed -i "s/^${param}=.*/${param}=${value}/" "${logind_conf}"
+    else
+      echo "${param}=${value}" | sudo tee -a "${logind_conf}" > /dev/null
+    fi
+  }
+  set_logind_param "HandleLidSwitch" "${lid_action}"
+  set_logind_param "HandleLidSwitchExternalPower" "${lid_action}"
+  set_logind_param "HandleLidSwitchDocked" "ignore"
+  sudo systemctl restart systemd-logind
+  echo "Lid switch action set to: ${lid_action}"
+  echo ""
+}
+apply_t2_extra_tweaks() {
+  # Placeholder for T2-specific tweaks (fan control, sensors, etc.).
+  # Add commands here when needed.
+  :
+}
+configure_bluetooth
+configure_lid_switch
+apply_t2_extra_tweaks
+echo "Hardware setup completed."
+#!/bin/bash
+set -euo pipefail
+echo "=== Setup packages ==="
+echo ""
+echo "Ensuring default shell is zsh"
+CURRENT_SHELL="${SHELL:-}"
+ZSH_PATH="$(command -v zsh || true)"
+if [ -n "${ZSH_PATH}" ] && [ "${CURRENT_SHELL}" != "${ZSH_PATH}" ]; then
+  echo "chsh -s ${ZSH_PATH}"
+  chsh -s "${ZSH_PATH}"
+else
+  echo "Zsh already default shell at ${ZSH_PATH}, skipping."
+fi
+echo ""
+echo "Toshy post-install setup placeholder"
+echo "Add any Toshy-specific settings here if needed."
+echo ""
+echo "Package setup completed."
+#!/bin/bash
+set -euo pipefail
+echo "=== Deploy dotfiles ==="
+echo ""
+if ! command -v stow >/dev/null 2>&1; then
+  echo "stow not found, installing."
+  sudo apt update
+  sudo apt install -y stow
+  echo ""
+fi
+HOME_DIR="${HOME}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_DIR="$(cd "${SCRIPT_DIR}/../dotfiles" && pwd)"
+cd "${DOTFILES_DIR}"
+echo "Home directory: ${HOME_DIR}"
+echo "Dotfiles directory: ${DOTFILES_DIR}"
+echo "Working directory: $(pwd)"
+echo ""
+echo "Deploy zsh dotfiles"
+stow -v -R --adopt --no-folding -t "${HOME_DIR}" zsh
+echo ""
+echo "Deploy p10k dotfiles"
+stow -v -R --adopt --no-folding -t "${HOME_DIR}" p10k
+echo ""
+echo "Deploy ideavim dotfiles"
+stow -v -R --adopt --no-folding -t "${HOME_DIR}" ideavim
+echo ""
+echo "Deploy fcitx5 dotfiles"
+stow -v -R --adopt --no-folding -t "${HOME_DIR}" fcitx5
+echo ""
+echo "Dotfiles deployment completed."

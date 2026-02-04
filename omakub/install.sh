@@ -1,104 +1,82 @@
 #!/bin/bash
 set -euo pipefail
 
-WORK_DIR="$(pwd -P)"
+# Work directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "${SCRIPT_DIR}"
 
-confirm_or_return() {
-  local option_name="$1"
-  local reply
-  read -r -p "Ready to execute ${option_name}. Are you sure? [y/N]: " reply || true
+# Atomic Scripts List
+SCRIPTS=(
+  "01-install-firmware.sh"
+  "02-install-omakub.sh"
+  "03-setup-hardware.sh"
+  "04-install-zsh-env.sh"
+  "05-install-jetbrains.sh"
+  "06-install-toshy.sh"
+  "07-install-fcitx5.sh"
+  "08-install-dotfiles.sh"
+)
+
+confirm() {
+  local msg="$1"
+  read -r -p "${msg} [y/N]: " reply || true
   case "${reply}" in
     [Yy]|[Yy][Ee][Ss]) return 0 ;;
     *) return 1 ;;
   esac
 }
 
-install_dependencies() {
-  local packages=()
-  if ! command -v stow >/dev/null 2>&1; then
-    packages+=("stow")
-  fi
-  if ! command -v curl >/dev/null 2>&1; then
-    packages+=("curl")
-  fi
-  if ! command -v git >/dev/null 2>&1; then
-    packages+=("git")
-  fi
-
-  if [ "${#packages[@]}" -gt 0 ]; then
-    sudo apt update
-    sudo apt install -y "${packages[@]}"
+run_script() {
+  local script="$1"
+  if [ -f "${script}" ]; then
+    echo "--- Executing ${script} ---"
+    bash "${script}"
+    echo "--- Finished ${script} ---"
+    echo ""
+  else
+    echo "Error: Script ${script} not found."
   fi
 }
 
-run_scripts() {
-  local script
-  for script in "$@"; do
-    local src="${WORK_DIR}/omakub/${script}"
-    if [ ! -f "${src}" ]; then
-      echo "Missing script: ${src}"
-      exit 1
-    fi
-    bash "${src}"
+run_all() {
+  echo "Running all scripts sequentially..."
+  for script in "${SCRIPTS[@]}"; do
+    run_script "${script}"
   done
 }
 
 while true; do
-  echo "=== Omakub T2 Setup Menu ==="
-  echo "1) Install T2 Firmware (Wi-Fi/Bluetooth)"
-  echo "2) Install Omakub Base System"
-  echo "3) Sync Apps & Dotfiles (Idempotent)"
-  echo "4) System Setup (Initial/One-time)"
-  echo "q) Quit"
+  echo "=== Omakub Atomic Setup Launcher ==="
+  echo "A) Run All (Sequential)"
+  for i in "${!SCRIPTS[@]}"; do
+    echo "$((i+1))) ${SCRIPTS[$i]}"
+  done
+  echo "Q) Quit"
   echo ""
   read -r -p "Select an option: " choice || true
   echo ""
 
   case "${choice}" in
-    1)
-      if ! confirm_or_return "Install T2 Firmware (Wi-Fi/Bluetooth)"; then
-        continue
+    [Aa])
+      if confirm "Run all scripts?"; then
+        run_all
+        echo "All scripts executed."
+        exit 0
       fi
-      if ! sudo get-apple-firmware get_from_online; then
-        echo "Firmware download failed."
-        echo "Try a different firmware version or keep a smartphone screen on nearby and retry."
-        exit 1
-      fi
-      echo "Installation Complete. Please REBOOT your Mac now."
-      exit 0
       ;;
-    2)
-      if ! confirm_or_return "Install Omakub Base System"; then
-        continue
+    [1-8])
+      idx=$((choice-1))
+      script="${SCRIPTS[$idx]}"
+      if confirm "Run ${script}?"; then
+        run_script "${script}"
       fi
-      wget -qO- https://omakub.org/install | bash
-      echo "Omakub Base installed."
-      exit 0
       ;;
-    3)
-      if ! confirm_or_return "Sync Apps & Dotfiles (Idempotent)"; then
-        continue
-      fi
-      install_dependencies
-      run_scripts "install-packages.sh" "install-dotfiles.sh"
-      echo "Sync complete!"
-      exit 0
-      ;;
-    4)
-      if ! confirm_or_return "System Setup (Initial/One-time)"; then
-        continue
-      fi
-      run_scripts "setup-hardware.sh" "setup-packages.sh"
-      echo "System setup complete!"
-      exit 0
-      ;;
-    q|Q)
+    [Qq])
       echo "Exiting."
       exit 0
       ;;
     *)
-      echo "Invalid selection. Please choose 1, 2, 3, 4, or q."
-      echo ""
+      echo "Invalid selection."
       ;;
   esac
 done
