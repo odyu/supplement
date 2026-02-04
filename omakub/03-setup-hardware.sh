@@ -1,33 +1,30 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "=== 03-setup-hardware.sh ==="
-echo "Applying hardware patches..."
+echo "=== 03-setup-hardware.sh (Safe Mode) ==="
+echo "Applying userspace hardware settings..."
+
+# --- 危険なカーネル変更処理を削除 ---
+# T2 Macでのクラッシュを防ぐため、update-initramfs と modprobe は行わない
+# ------------------------------------
 
 configure_bluetooth() {
-  echo "Configuring Bluetooth power management..."
-  echo "options btusb enable_autosuspend=n" | sudo tee /etc/modprobe.d/bluetooth-disable-autosuspend.conf > /dev/null
-
-  if command -v update-initramfs &> /dev/null; then
-    echo "Updating initramfs..."
-    sudo update-initramfs -u
-  fi
-
-  echo "Tuning Bluetooth configuration..."
+  echo "Tuning Bluetooth configuration (/etc/bluetooth/main.conf)..."
   local bt_conf="/etc/bluetooth/main.conf"
 
+  # 設定ファイルの書き換えのみ行う（再起動不要・安全）
   update_bt_config() {
     local param=$1
     local value=$2
-    if grep -q "^#\\?${param}\\s*=" "${bt_conf}"; then
-      sudo sed -i "s/^#\\?${param}\\s*=.*/${param} = ${value}/" "${bt_conf}"
+    if grep -q "^#\?${param}\s*=" "${bt_conf}"; then
+      sudo sed -i "s/^#\?${param}\s*=.*/${param} = ${value}/" "${bt_conf}"
     else
       echo "${param} = ${value}" | sudo tee -a "${bt_conf}" > /dev/null
     fi
   }
 
   if [ -f "${bt_conf}" ]; then
-    if ! grep -q "^\\[Policy\\]" "${bt_conf}" 2>/dev/null; then
+    if ! grep -q "^\[Policy\]" "${bt_conf}" 2>/dev/null; then
       echo -e "\n[Policy]" | sudo tee -a "${bt_conf}" > /dev/null
     fi
 
@@ -41,7 +38,7 @@ configure_bluetooth() {
     else
       sudo systemctl enable --now bluetooth
     fi
-    echo "Bluetooth configuration optimized."
+    echo "Bluetooth configuration updated (Userspace only)."
   else
     echo "Warning: ${bt_conf} not found. Skipping Bluetooth tuning."
   fi
@@ -53,6 +50,7 @@ configure_lid_switch() {
   local logind_conf="/etc/systemd/logind.conf"
 
   if [ -f "${logind_conf}" ]; then
+    # バックアップを作成
     if [ ! -f "${logind_conf}.bak" ]; then
       sudo cp "${logind_conf}" "${logind_conf}.bak"
     fi
@@ -60,8 +58,8 @@ configure_lid_switch() {
     set_logind_param() {
       local param=$1
       local value=$2
-      if grep -q "^#\\?${param}=" "${logind_conf}"; then
-        sudo sed -i "s/^#\\?${param}=.*/${param}=${value}/" "${logind_conf}"
+      if grep -q "^#\?${param}=" "${logind_conf}"; then
+        sudo sed -i "s/^#\?${param}=.*/${param}=${value}/" "${logind_conf}"
       else
         echo "${param}=${value}" | sudo tee -a "${logind_conf}" > /dev/null
       fi
@@ -70,15 +68,16 @@ configure_lid_switch() {
     set_logind_param "HandleLidSwitch" "${lid_action}"
     set_logind_param "HandleLidSwitchExternalPower" "${lid_action}"
     set_logind_param "HandleLidSwitchDocked" "ignore"
-
+    
+    # logindのみ再起動（OS再起動は不要）
     sudo systemctl restart systemd-logind
-    echo "Lid switch action set to: ${lid_action}"
+    echo "Lid switch configuration applied."
   else
-    echo "Warning: ${logind_conf} not found. Skipping lid switch configuration."
+    echo "Warning: ${logind_conf} not found."
   fi
 }
 
 configure_bluetooth
 configure_lid_switch
 
-echo "Hardware setup completed. Some changes may require a reboot."
+echo "Hardware setup completed (No reboot required)."
