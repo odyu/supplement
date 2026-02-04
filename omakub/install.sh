@@ -41,7 +41,7 @@ run_personal_scripts() {
 
   local script
   for script in "${scripts[@]}"; do
-    local src="${WORK_DIR}/${script}"
+    local src="${WORK_DIR}/omakub/${script}"
     if [ ! -f "${src}" ]; then
       echo "Missing script: ${src}"
       exit 1
