@@ -1,8 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TARGET_DIR="${HOME}/.local/share/omakub/install/personal"
+WORK_DIR="$(pwd -P)"
 
 confirm_or_return() {
   local option_name="$1"
@@ -32,9 +31,7 @@ install_dependencies() {
   fi
 }
 
-link_personal_scripts() {
-  mkdir -p "${TARGET_DIR}"
-
+run_personal_scripts() {
   local scripts=(
     "install-packages.sh"
     "install-dotfiles.sh"
@@ -44,34 +41,20 @@ link_personal_scripts() {
 
   local script
   for script in "${scripts[@]}"; do
-    local src="${SCRIPT_DIR}/${script}"
+    local src="${WORK_DIR}/${script}"
     if [ ! -f "${src}" ]; then
       echo "Missing script: ${src}"
       exit 1
     fi
-    chmod +x "${src}"
-    ln -sf "${src}" "${TARGET_DIR}/${script}"
+    bash "${src}"
   done
-}
-
-run_omakub() {
-  echo "Triggering Omakub..."
-  if command -v omakub >/dev/null 2>&1; then
-    omakub
-  elif [ -x "${HOME}/.local/bin/omakub" ]; then
-    "${HOME}/.local/bin/omakub"
-  else
-    echo "Error: 'omakub' command not found."
-    echo "Please restart your shell and run 'omakub' manually."
-    exit 1
-  fi
 }
 
 while true; do
   echo "=== Omakub T2 Setup Menu ==="
-  echo "1) Install T2 Firmware (Wi-Fi/Bluetooth) - Requires Reboot"
+  echo "1) Install T2 Firmware (Wi-Fi/Bluetooth)"
   echo "2) Install Omakub Base System"
-  echo "3) Link Personal Scripts & Run Omakub (Finalize)"
+  echo "3) Run Personal Setup (Packages & Dotfiles)"
   echo "q) Quit"
   echo ""
   read -r -p "Select an option: " choice || true
@@ -79,10 +62,14 @@ while true; do
 
   case "${choice}" in
     1)
-      if ! confirm_or_return "Install T2 Firmware (Wi-Fi/Bluetooth) - Requires Reboot"; then
+      if ! confirm_or_return "Install T2 Firmware (Wi-Fi/Bluetooth)"; then
         continue
       fi
-      sudo get-apple-firmware get_from_online
+      if ! sudo get-apple-firmware get_from_online; then
+        echo "Firmware download failed."
+        echo "Try a different firmware version or keep a smartphone screen on nearby and retry."
+        exit 1
+      fi
       echo "Installation Complete. Please REBOOT your Mac now."
       exit 0
       ;;
@@ -95,12 +82,11 @@ while true; do
       exit 0
       ;;
     3)
-      if ! confirm_or_return "Link Personal Scripts & Run Omakub (Finalize)"; then
+      if ! confirm_or_return "Run Personal Setup (Packages & Dotfiles)"; then
         continue
       fi
       install_dependencies
-      link_personal_scripts
-      run_omakub
+      run_personal_scripts
       echo "All setup complete!"
       exit 0
       ;;
