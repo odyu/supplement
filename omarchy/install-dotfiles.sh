@@ -23,12 +23,6 @@ echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} zsh"
 stow -v -R --adopt --no-folding -t "${HOME_DIR}" zsh
 echo ""
 
-echo "🔸 Deploy p10k dotfiles"
-echo ""
-echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} p10k"
-stow -v -R --adopt --no-folding -t "${HOME_DIR}" p10k
-echo ""
-
 echo "🔸 Deploy ideavim dotfiles"
 echo ""
 echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} ideavim"
@@ -45,12 +39,6 @@ echo "🔸 Deploy fcitx5 dotfiles"
 echo ""
 echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} fcitx5"
 stow -v -R --adopt --no-folding -t "${HOME_DIR}" fcitx5
-echo ""
-
-echo "🔸 Deploy waybar dotfiles"
-echo ""
-echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} waybar"
-stow -v -R --adopt --no-folding -t "${HOME_DIR}" waybar
 echo ""
 
 echo "🔸 Deploy local dotfiles"
