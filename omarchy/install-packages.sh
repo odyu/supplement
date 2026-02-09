@@ -17,8 +17,8 @@ PACMAN_PACKAGES=(
   sheldon
   zsh
 )
-echo "sudo pacman -S --noconfirm --needed ${PACMAN_PACKAGES[*]}"
-sudo pacman -S --noconfirm --needed "${PACMAN_PACKAGES[@]}"
+echo "sudo pacman -Syyu --noconfirm --needed ${PACMAN_PACKAGES[*]}"
+sudo pacman -Syyu --noconfirm --needed "${PACMAN_PACKAGES[@]}"
 echo ""
 
 

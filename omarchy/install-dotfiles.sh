@@ -23,6 +23,12 @@ echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} zsh"
 stow -v -R --adopt --no-folding -t "${HOME_DIR}" zsh
 echo ""
 
+echo "🔸 Deploy sheldon dotfiles"
+echo ""
+echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} sheldon"
+stow -v -R --adopt --no-folding -t "${HOME_DIR}" sheldon
+echo ""
+
 echo "🔸 Deploy ideavim dotfiles"
 echo ""
 echo "stow -v -R --adopt --no-folding -t ${HOME_DIR} ideavim"

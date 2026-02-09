@@ -1,0 +1,123 @@
+shell = "zsh"
+
+# ==============================================================================
+# Core Mechanisms
+# ==============================================================================
+[plugins.zsh-defer]
+github = "romkatv/zsh-defer"
+apply = ["source"]
+
+[templates]
+defer = "{% for file in files %}zsh-defer source \"{{ file }}\"\n{% endfor %}"
+
+[plugins.zsh-completions]
+github = "zsh-users/zsh-completions"
+apply = ["source"]
+
+[plugins.compinit]
+inline = 'autoload -Uz compinit && compinit'
+
+# ==============================================================================
+# Oh My Zsh Library (Base)
+# ==============================================================================
+# Core Functions (必須・最優先)
+[plugins.ohmyzsh-lib-core]
+github = "ohmyzsh/ohmyzsh"
+dir = "lib"
+use = ["functions.zsh"]
+apply = ["source"]
+
+# Extra Libraries (Git, Keybindings, etc.)
+[plugins.ohmyzsh-lib-extras]
+github = "ohmyzsh/ohmyzsh"
+dir = "lib"
+use = ["{git,completion,key-bindings,theme-and-appearance,directories,termsupport}.zsh"]
+apply = ["source"]
+
+# ==============================================================================
+# Theme: Pure
+# ==============================================================================
+# 1. 依存ライブラリ: zsh-async (非同期処理)
+[plugins.zsh-async]
+github = "mafredri/zsh-async"
+apply = ["source"]
+
+# 2. Pure テーマ本体 (fpathに追加)
+[plugins.pure]
+github = "sindresorhus/pure"
+apply = ["fpath"]
+
+# 3. Pure 初期化 (inlineで実行)
+[plugins.pure-init]
+inline = 'autoload -U promptinit; promptinit && prompt pure'
+
+# ==============================================================================
+# Tool Managers
+# ==============================================================================
+[plugins.mise]
+inline = 'type mise &>/dev/null && eval "$(mise activate zsh)"'
+
+# ==============================================================================
+# Plugins (Deferred)
+# ==============================================================================
+
+# Git Status etc.
+[plugins.ohmyzsh-git]
+github = "ohmyzsh/ohmyzsh"
+dir = "plugins/git"
+apply = ["defer"]
+
+# Ruby / Rails
+[plugins.ohmyzsh-rails]
+github = "ohmyzsh/ohmyzsh"
+dir = "plugins/rails"
+apply = ["defer"]
+
+[plugins.ohmyzsh-ruby]
+github = "ohmyzsh/ohmyzsh"
+dir = "plugins/ruby"
+apply = ["defer"]
+
+# Node / npm
+[plugins.ohmyzsh-npm]
+github = "ohmyzsh/ohmyzsh"
+dir = "plugins/npm"
+apply = ["defer"]
+
+# Arch Linux
+[plugins.ohmyzsh-archlinux]
+github = "ohmyzsh/ohmyzsh"
+dir = "plugins/archlinux"
+apply = ["defer"]
+
+# Utilities
+[plugins.ohmyzsh-sudo]
+github = "ohmyzsh/ohmyzsh"
+dir = "plugins/sudo"
+apply = ["defer"]
+
+[plugins.ohmyzsh-web-search]
+github = "ohmyzsh/ohmyzsh"
+dir = "plugins/web-search"
+apply = ["defer"]
+
+[plugins.ohmyzsh-extract]
+github = "ohmyzsh/ohmyzsh"
+dir = "plugins/extract"
+apply = ["defer"]
+
+[plugins.ohmyzsh-cp]
+github = "ohmyzsh/ohmyzsh"
+dir = "plugins/cp"
+apply = ["defer"]
+
+# ==============================================================================
+# Highlighting & Suggestions
+# ==============================================================================
+[plugins.zsh-autosuggestions]
+github = "zsh-users/zsh-autosuggestions"
+apply = ["defer"]
+
+[plugins.zsh-syntax-highlighting]
+github = "zsh-users/zsh-syntax-highlighting"
+apply = ["defer"]
