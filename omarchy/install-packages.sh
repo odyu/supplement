@@ -9,6 +9,8 @@ echo ""
 echo "🔸 Install packages By PACMAN"
 echo ""
 PACMAN_PACKAGES=(
+  bluez-utils
+  bluez
   fcitx5-configtool
   fcitx5-im
   fcitx5-mozc
