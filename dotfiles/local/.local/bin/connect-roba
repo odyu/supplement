@@ -8,22 +8,42 @@ bluetoothctl power on > /dev/null 2>&1
 
 # 2. MACアドレスの取得
 # ペアリング済みリストから "roBa" を検索
-MAC_ADDR=$(bluetoothctl devices | grep "roBa" | awk '{print $2}' | head -n 1)
+MAC_ADDR=$(bluetoothctl devices | grep -i "roBa" | awk '{print $2}' | head -n 1)
 
 # ペアリングされていない、または見つからない場合
 if [ -z "$MAC_ADDR" ]; then
     echo "⚠️  RoBa not found in paired devices."
-    echo "📡 Scanning for 5 seconds..."
-    bluetoothctl --timeout 5 scan on > /dev/null 2>&1
-    # 再取得試行
-    MAC_ADDR=$(bluetoothctl devices | grep "roBa" | awk '{print $2}' | head -n 1)
+    echo "📡 Scanning for new devices..."
+
+    # スキャンを開始してバックグラウンドで実行
+    bluetoothctl scan on &
+    SCAN_PID=$!
+    sleep 8
+
+    # スキャン結果から取得（devices Pairedではなくdevicesで全て）
+    MAC_ADDR=$(bluetoothctl devices | grep -i "roBa" | awk '{print $2}' | head -n 1)
+
+    # スキャン停止
+    kill $SCAN_PID 2>/dev/null
+    bluetoothctl scan off > /dev/null 2>&1
 fi
 
 if [ -z "$MAC_ADDR" ]; then
-    echo "❌ RoBa device could not be found. Is it in pairing mode?"
+    echo "❌ RoBa device could not be found. Please ensure it is powered on and in range."
     echo "Press Enter to exit..."
     read
     exit 1
+fi
+
+# デバイスが見つかったら、ペアリング状態を確認
+PAIRED=$(bluetoothctl info "$MAC_ADDR" 2>/dev/null | grep "Paired: yes")
+
+if [ -z "$PAIRED" ]; then
+    echo "🔗 Device found but not paired. Pairing now..."
+    bluetoothctl pair "$MAC_ADDR"
+    sleep 1
+    bluetoothctl trust "$MAC_ADDR"
+    sleep 1
 fi
 
 echo "🎯 Target Found: $MAC_ADDR"
@@ -43,43 +63,31 @@ while true; do
         RETRY_COUNT=$((RETRY_COUNT + 1))
         echo "⚠️  Connection failed (attempt $RETRY_COUNT)."
 
-        # 3回失敗したらBluetoothサービスを完全にリセット
-        if [ $RETRY_COUNT -eq 3 ]; then
-            echo "🔄 Removing device and resetting Bluetooth service..."
-            bluetoothctl remove "$MAC_ADDR"
-            sleep 1
+        # 1回失敗したらデバイスを削除して再ペアリング
+        echo "🔄 Removing device for re-pairing..."
+        bluetoothctl remove "$MAC_ADDR"
+        sleep 1
 
-            echo "🔧 Stopping Bluetooth service..."
-            sudo systemctl stop bluetooth
-            sleep 1
+        echo "📡 Scanning for device..."
+        bluetoothctl --timeout 5 scan on > /dev/null 2>&1
 
-            echo "🗑️  Clearing Bluetooth cache..."
-            sudo rm -rf /var/lib/bluetooth
-            sudo mkdir /var/lib/bluetooth
-            sleep 1
+        MAC_ADDR=$(bluetoothctl devices | grep "roBa" | awk '{print $2}' | head -n 1)
 
-            echo "🔧 Starting Bluetooth service..."
-            sudo systemctl start bluetooth
-            sleep 2
-
-            echo "📡 Scanning for device..."
-            bluetoothctl power on > /dev/null 2>&1
-            sleep 1
-            bluetoothctl --timeout 5 scan on > /dev/null 2>&1
-            MAC_ADDR=$(bluetoothctl devices | grep "roBa" | awk '{print $2}' | head -n 1)
-
-            if [ -z "$MAC_ADDR" ]; then
-                echo "❌ Device not found after reset. Please ensure RoBa is in pairing mode."
-                echo "Press Enter to exit..."
-                read
-                exit 1
-            fi
-
-            echo "🎯 Device found again: $MAC_ADDR"
-            RETRY_COUNT=0
+        if [ -z "$MAC_ADDR" ]; then
+            echo "❌ Device not found. Please ensure RoBa is powered on."
+            echo "Press Enter to exit..."
+            read
+            exit 1
         fi
 
-        echo "   Retrying in 2 seconds... (Press Ctrl+C to stop)"
+        echo "🎯 Device found: $MAC_ADDR"
+        echo "🔗 Pairing..."
+        bluetoothctl pair "$MAC_ADDR"
+        sleep 1
+        bluetoothctl trust "$MAC_ADDR"
+        sleep 1
+
+        echo "   Retrying connection in 2 seconds... (Press Ctrl+C to stop)"
         sleep 2
     fi
 done
