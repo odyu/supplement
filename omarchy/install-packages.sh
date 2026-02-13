@@ -18,6 +18,8 @@ PACMAN_PACKAGES=(
   stow
   sheldon
   zsh
+  nautilus
+  gvfs
 )
 echo "sudo pacman -Syyu --noconfirm --needed ${PACMAN_PACKAGES[*]}"
 sudo pacman -Syyu --noconfirm --needed "${PACMAN_PACKAGES[@]}"
