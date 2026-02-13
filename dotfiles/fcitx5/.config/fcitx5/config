@@ -5,21 +5,22 @@ TriggerKeys=
 EnumerateWithTriggerKeys=True
 # Enumerate Input Method Forward
 EnumerateForwardKeys=
-# Enumerate Input Method Backward
-EnumerateBackwardKeys=
 # Skip first input method while enumerating
 EnumerateSkipFirst=False
 # Time limit in milliseconds for triggering modifier key shortcuts
 ModifierOnlyKeyTimeout=250
 
 [Hotkey/ActivateKeys]
-0=Henkan
+0=Hangul
 
 [Hotkey/DeactivateKeys]
-0=Muhenkan
+0=Hangul_Hanja
 
 [Hotkey/AltTriggerKeys]
 0=Shift_L
+
+[Hotkey/EnumerateBackwardKeys]
+0=j
 
 [Hotkey/EnumerateGroupForwardKeys]
 0=Super+space
