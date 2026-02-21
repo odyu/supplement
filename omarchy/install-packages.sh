@@ -29,9 +29,9 @@ echo ""
 echo "🔸 Install packages By AUR"
 echo ""
 AUR_PACKAGES=(
-  bitwarden-bin
   google-chrome
   jetbrains-toolbox
+  visual-studio-code-bin
 )
 echo "yay -S --noconfirm --needed ${AUR_PACKAGES[*]}"
 yay -S --noconfirm --needed "${AUR_PACKAGES[@]}"
